@@ -1,292 +1,159 @@
+
+
 // ============================================================
 //  src/controllers/publicController.js
 // ============================================================
-
 const { AI, FlashCard, Roadmap, Tip, Setting, Review, Badge, Progress, Challenge } = require('../models');
 const db = require('../config/database');
 const { recommend } = require('../services/recommenderService');
 
 exports.home = async (req, res, next) => {
-  try {
-
-    const [featured, settings, challenge] = await Promise.all([
-      AI.featured(),
-      Setting.getMap(),
-      Challenge.today()
-    ]);
-
-    const isDone = req.user ? await Challenge.isDoneToday(req.user.id) : false;
-
-    const trending = await db('ai_tools')
-      .where({ is_active: true })
-      .orderBy('view_count','desc')
-      .limit(3);
-
-    res.render('pages/index', {
-      title: settings.site_name || 'AI Guide',
-      featured,
-      settings
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const [featured, settings, challenge] = await Promise.all([AI.featured(), Setting.getMap(), Challenge.today()]);
+const isDone = req.user ? await Challenge.isDoneToday(req.user.id) : false;
+const trending = await db('ai_tools').where({ is_active: true }).orderBy('view_count','desc').limit(3);
+res.render('pages/index', { title: settings.site_name || 'AI Guide', featured, settings });
+} catch (e) { next(e); }
 };
-
 
 exports.explore = async (req, res, next) => {
-  try {
-
-    const filters = {
-      type: req.query.type,
-      pricing: req.query.pricing,
-      difficulty: req.query.difficulty,
-      search: req.query.search
-    };
-
-    const [ais, types] = await Promise.all([
-      AI.all(filters),
-      AI.types()
-    ]);
-
-    res.render('pages/explore', {
-      title: 'Explorer les IAs',
-      ais,
-      types,
-      filters
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const filters = {
+type      : req.query.type,
+pricing   : req.query.pricing,
+difficulty: req.query.difficulty,
+search    : req.query.search
 };
-
+const [ais, types] = await Promise.all([AI.all(filters), AI.types()]);
+res.render('pages/explore', { title: 'Explorer les IAs', ais, types, filters });
+} catch (e) { next(e); }
+};
 
 exports.aiDetail = async (req, res, next) => {
-  try {
-
-    const ai = await AI.bySlug(req.params.slug);
-
-    if (!ai) {
-      req.flash('error', 'IA introuvable');
-      return res.redirect('/explore');
-    }
-
-    await AI.incView(ai.id);
-
-    res.render('pages/ai-detail', {
-      title: ai.name + ' — Detail',
-      ai
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const ai = await AI.bySlug(req.params.slug);
+if (!ai) { req.flash('error', 'IA introuvable'); return res.redirect('/explore'); }
+await AI.incView(ai.id);
+res.render('pages/ai-detail', { title: ai.name + ' — Detail', ai });
+} catch (e) { next(e); }
 };
-
 
 exports.tips = async (req, res, next) => {
-  try {
-
-    const cat = req.query.category;
-
-    const [tips, categories] = await Promise.all([
-      Tip.all(cat),
-      Tip.categories()
-    ]);
-
-    res.render('pages/tips', {
-      title: 'Astuces IA',
-      tips,
-      categories,
-      activeCategory: cat || null
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const cat = req.query.category;
+const [tips, categories] = await Promise.all([Tip.all(cat), Tip.categories()]);
+res.render('pages/tips', { title: 'Astuces IA', tips, categories, activeCategory: cat || null });
+} catch (e) { next(e); }
 };
-
 
 exports.flashcards = async (req, res, next) => {
-  try {
-
-    const cat = req.query.category;
-
-    const [cards, categories] = await Promise.all([
-      cat ? FlashCard.byCategory(cat) : FlashCard.all(),
-      FlashCard.categories()
-    ]);
-
-    res.render('pages/flashcards', {
-      title: 'Flash Cards IA',
-      cards,
-      categories,
-      activeCategory: cat || null
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const cat = req.query.category;
+const [cards, categories] = await Promise.all([
+cat ? FlashCard.byCategory(cat) : FlashCard.all(),
+FlashCard.categories()
+]);
+res.render('pages/flashcards', { title: 'Flash Cards IA', cards, categories, activeCategory: cat || null });
+} catch (e) { next(e); }
 };
-
 
 exports.roadmap = async (req, res, next) => {
-  try {
-
-    const roadmaps = await Roadmap.all();
-
-    res.render('pages/roadmap', {
-      title: 'Roadmap IA',
-      roadmaps
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const roadmaps = await Roadmap.all();
+res.render('pages/roadmap', { title: 'Roadmap IA', roadmaps });
+} catch (e) { next(e); }
 };
-
 
 exports.roadmapDetail = async (req, res, next) => {
-  try {
-
-    const roadmap = await Roadmap.byId(req.params.id);
-
-    if (!roadmap) {
-      req.flash('error', 'Roadmap introuvable');
-      return res.redirect('/roadmap');
-    }
-
-    const completed = req.user
-      ? await Progress.get(req.user.id, roadmap.id)
-      : [];
-
-    res.render('pages/roadmap-detail', {
-      title: roadmap.title,
-      roadmap,
-      completed
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const roadmap = await Roadmap.byId(req.params.id);
+if (!roadmap) { req.flash('error', 'Roadmap introuvable'); return res.redirect('/roadmap'); }
+const completed = req.user ? await Progress.get(req.user.id, roadmap.id) : [];
+res.render('pages/roadmap-detail', { title: roadmap.title, roadmap, completed });
+} catch (e) { next(e); }
 };
-
 
 exports.compare = async (req, res, next) => {
-  try {
-
-    const ids = (req.query.ids || '')
-      .split(',')
-      .filter(Boolean)
-      .slice(0, 3);
-
-    const selected = ids.length >= 2
-      ? (await Promise.all(ids.map((id) => AI.byId(id)))).filter(Boolean)
-      : [];
-
-    const allAIs = await AI.all({});
-
-    res.render('pages/compare', {
-      title: 'Comparer les IAs',
-      selected,
-      allAIs
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const ids      = (req.query.ids || '').split(',').filter(Boolean).slice(0, 3);
+const selected = ids.length >= 2
+? (await Promise.all(ids.map((id) => AI.byId(id)))).filter(Boolean)
+: [];
+const allAIs = await AI.all({});
+res.render('pages/compare', { title: 'Comparer les IAs', selected, allAIs });
+} catch (e) { next(e); }
 };
-
 
 exports.recommendPost = async (req, res, next) => {
-  try {
-
-    const { description, type, pricing, difficulty } = req.body;
-
-    if (!description || description.trim().length < 5) {
-      req.flash('error', 'Decris ton projet (min 5 caracteres)');
-      return res.redirect('/explore');
-    }
-
-    const result = await recommend(description.trim(), {
-      type,
-      pricing,
-      difficulty
-    });
-
-    res.render('pages/recommendations', {
-      title: 'IAs recommandees',
-      result,
-      description
-    });
-
-  } catch (e) {
-    next(e);
-  }
+try {
+const { description, type, pricing, difficulty } = req.body;
+if (!description || description.trim().length < 5) {
+req.flash('error', 'Decris ton projet (min 5 caracteres)');
+return res.redirect('/explore');
+}
+const result = await recommend(description.trim(), { type, pricing, difficulty });
+res.render('pages/recommendations', { title: 'IAs recommandees', result, description });
+} catch (e) { next(e); }
 };
-
 
 // ─── NOUVEAUTÉS ────────────────────────────────────────────────
-
 exports.nouveautes = async (req, res, next) => {
-  try {
+try {
+const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+const newAIs = await db('ai_tools')
+.where({ is_active: true })
+.where('created_at', '>=', oneMonthAgo)
+.orderBy('created_at', 'desc')
+.limit(20);
 
-    const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+const trending = await db('ai_tools')  
+  .where({ is_active: true })  
+  .orderBy('view_count', 'desc')  
+  .limit(8);  
 
-    const newAIs = await db('ai_tools')
-      .where({ is_active: true })
-      .where('created_at', '>=', oneMonthAgo)
-      .orderBy('created_at', 'desc')
-      .limit(20);
+res.render('pages/nouveautes', {  
+  layout: 'layouts/main', title: 'Nouveautés',  
+  newAIs: newAIs.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
+  trending: trending.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
+});
 
-    const trending = await db('ai_tools')
-      .where({ is_active: true })
-      .orderBy('view_count', 'desc')
-      .limit(8);
-
-    res.render('pages/nouveautes', {
-      layout: 'layouts/main',
-      title: 'Nouveautés',
-      newAIs: newAIs.map(a => ({
-        ...a,
-        tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })()
-      })),
-      trending: trending.map(a => ({
-        ...a,
-        tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })()
-      }))
-    });
-
-  } catch (e) {
-    next(e);
-  }
+} catch (e) { next(e); }
 };
 
+// ─── NOUVEAUTÉS ────────────────────────────────────────────────
+exports.nouveautes = async (req, res, next) => {
+try {
+const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+const newAIs = await db('ai_tools')
+.where({ is_active: true })
+.where('created_at', '>=', oneMonthAgo)
+.orderBy('created_at', 'desc')
+.limit(20);
+
+const trending = await db('ai_tools')  
+  .where({ is_active: true })  
+  .orderBy('view_count', 'desc')  
+  .limit(8);  
+
+res.render('pages/nouveautes', {  
+  layout: 'layouts/main', title: 'Nouveautés',  
+  newAIs: newAIs.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
+  trending: trending.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
+});
+
+} catch (e) { next(e); }
+};
 
 exports.saveProgress = async (req, res, next) => {
-  try {
-
-    if (!req.user)
-      return res.status(401).json({ error:'Non connecté' });
-
-    const { roadmap_id, steps } = req.body;
-
-    await Progress.set(req.user.id, roadmap_id, steps);
-
-    const roadmap = await Roadmap.byId(roadmap_id);
-
-    if (roadmap && roadmap.steps && steps.length >= roadmap.steps.length) {
-      await Badge.award(req.user.id, 'roadmap_complete');
-    }
-
-    if (steps.length >= 1) {
-      await Badge.award(req.user.id, 'first_roadmap');
-    }
-
-    res.json({ ok:true });
-
-  } catch(e) {
-    next(e);
-  }
+try {
+if (!req.user) return res.status(401).json({ error:'Non connecté' });
+const { roadmap_id, steps } = req.body;
+await Progress.set(req.user.id, roadmap_id, steps);
+const roadmap = await Roadmap.byId(roadmap_id);
+if (roadmap && roadmap.steps && steps.length >= roadmap.steps.length) {
+await Badge.award(req.user.id, 'roadmap_complete');
+}
+if (steps.length >= 1) await Badge.award(req.user.id, 'first_roadmap');
+res.json({ ok:true });
+} catch(e){ next(e); }
 };

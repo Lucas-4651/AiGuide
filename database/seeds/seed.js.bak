@@ -257,10 +257,10 @@ function generateAIToolsList() {
 //  Seed Admin
 // ------------------------------------------------------------------
 async function seedAdmin() {
-  const exists = await db('users').where({ email: 'Rakotonirinalucas26@gmail.com' }).first();
+  const exists = await db2('users').where({ email: 'Rakotonirinalucas26@gmail.com' }).first();
   if (exists) { console.log('  [SKIP] Admin déjà présent'); return; }
   const hash = await bcrypt.hash('Lucas46', 12);
-  await db('users').insert({
+  await db2('users').insert({
     email        : 'Rakotonirinalucas26@gmail.com',
     username     : 'Lucas46',
     password_hash: hash,
@@ -275,7 +275,7 @@ async function seedAdmin() {
 //  Seed IA (ajoute uniquement celles qui n'existent pas encore)
 // ------------------------------------------------------------------
 async function seedAIs() {
-  const existingSlugs = await db('ai_tools').pluck('slug');
+  const existingSlugs = await db2('ai_tools').pluck('slug');
   console.log(`  [INFO] ${existingSlugs.length} IA existantes dans la base`);
 
   const allTools = generateAIToolsList();
@@ -290,7 +290,7 @@ async function seedAIs() {
   const batchSize = 20;
   for (let i = 0; i < newTools.length; i += batchSize) {
     const batch = newTools.slice(i, i + batchSize);
-    await db('ai_tools').insert(batch);
+    await db2('ai_tools').insert(batch);
     console.log(`  [OK] Lot ${Math.floor(i/batchSize)+1} : ${batch.length} IA insérées`);
   }
   console.log(`  [OK] Total de ${newTools.length} nouvelles IA ajoutées (${existingSlugs.length + newTools.length} au total)`);
@@ -301,10 +301,10 @@ async function seedAIs() {
 // ------------------------------------------------------------------
 async function seedContent() {
   // Flashcards
-  const cards = await db('flash_cards').count('id as c').first();
+  const cards = await db2('flash_cards').count('id as c').first();
   if (Number(cards.c) === 0) {
     const now = new Date().toISOString();
-    await db('flash_cards').insert([
+    await db2('flash_cards').insert([
       { term: 'LLM', definition: 'Large Language Model — modèle de langage entraîné sur de très grands corpus de texte pour prédire et générer du texte.', category: 'fondamentaux', difficulty: 1, order_index: 1, is_active: true, created_at: now },
       { term: 'Prompt', definition: 'Instruction ou question donnée à un modèle IA pour orienter sa réponse. La qualité du prompt influence directement la qualité du résultat.', category: 'fondamentaux', difficulty: 1, order_index: 2, is_active: true, created_at: now },
       { term: 'Token', definition: 'Unité de base du texte pour les LLMs. 1 token ≈ 4 caractères ou 3/4 de mot. Les modèles ont une limite de tokens par requête.', category: 'technique', difficulty: 2, example: 'Le mot "bonjour" = 1-2 tokens selon le modèle.', order_index: 3, is_active: true, created_at: now },
@@ -324,10 +324,10 @@ async function seedContent() {
   }
 
   // Tips
-  const tips = await db('tips').count('id as c').first();
+  const tips = await db2('tips').count('id as c').first();
   if (Number(tips.c) === 0) {
     const now = new Date().toISOString();
-    await db('tips').insert([
+    await db2('tips').insert([
       { title: 'Sois spécifique', content: 'Plus ton prompt est précis, meilleure sera la réponse. Évite les questions vagues.', category: 'prompting', difficulty: 'beginner', order_index: 1, is_active: true, created_at: now },
       { title: 'Donne un rôle', content: 'Dis à l\'IA qui elle est : "Tu es un expert en cybersécurité..." change la qualité de la réponse.', category: 'prompting', difficulty: 'beginner', order_index: 2, is_active: true, created_at: now },
       { title: 'Spécifie le format', content: 'Demande explicitement le format voulu : liste, tableau, JSON, code...', category: 'prompting', difficulty: 'beginner', order_index: 3, is_active: true, created_at: now },
@@ -343,9 +343,9 @@ async function seedContent() {
   }
 
   // Site settings
-  const settings = await db('site_settings').count('id as c').first();
+  const settings = await db2('site_settings').count('id as c').first();
   if (Number(settings.c) === 0) {
-    await db('site_settings').insert([
+    await db2('site_settings').insert([
       { key: 'site_name',            value: 'AI Guide',                      description: 'Nom du site' },
       { key: 'site_tagline',         value: 'Du débutant à l\'expert en IA', description: 'Tagline affichée sur la homepage' },
       { key: 'guest_prompt_limit',   value: '3',                             description: 'Nombre de prompts gratuits/jour pour les visiteurs' },
@@ -363,10 +363,10 @@ async function seedContent() {
 //  Seed Roadmaps
 // ------------------------------------------------------------------
 async function seedRoadmap() {
-  const count = await db('roadmaps').count('id as c').first();
+  const count = await db2('roadmaps').count('id as c').first();
   if (Number(count.c) === 0) {
     const now = new Date().toISOString();
-    await db('roadmaps').insert([
+    await db2('roadmaps').insert([
       {
         title             : 'Débutant IA — Découverte',
         description       : 'Parcours idéal pour découvrir l\'IA de zéro. Aucun prérequis technique.',
@@ -432,7 +432,7 @@ async function run() {
     await seedRoadmap();
     console.log('\n✅ Seed terminé avec succès !');
     console.log('🔑 Compte admin : admin@aiguide.com / admin123');
-    await db.destroy();
+    await db2.destroy();
   } catch (e) {
     console.error('\n❌ Erreur seed:', e.message);
     process.exit(1);

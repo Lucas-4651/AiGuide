@@ -1,14 +1,4 @@
-require('dotenv').config();
-const forcePG = process.argv.includes('--pg') || process.env.NODE_ENV === 'production';
-let db;
-if (forcePG) {
-  if (!process.env.DATABASE_URL) { console.error('❌  DATABASE_URL manquant'); process.exit(1); }
-  db = require('knex')({ client:'pg', connection:{ connectionString:process.env.DATABASE_URL, ssl:{rejectUnauthorized:false} } });
-  console.log('🔌  PostgreSQL (Neon)');
-} else {
-  db = require('../../src/config/database');
-  console.log('🔌  SQLite local');
-}
+const db = require('../../src/config/database');
 async function run() {
   // Collections de prompts
   await db.schema.createTableIfNotExists('collections', t => {

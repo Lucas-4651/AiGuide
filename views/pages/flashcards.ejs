@@ -13,7 +13,7 @@
   
   <!-- Category Tabs -->
   <div class="category-tabs">
-    <a href="/flashcards" class="tab-btn <%= !activeCategory ? 'active' : '' %>">
+    <a href="/flashcards" class="tab-btn <%= typeof activeCategory==="undefined"||!activeCategory ? 'active' : '' %>">
       Toutes (<%= cards.length %>)
     </a>
     <% categories.forEach(cat => { %>

@@ -70,7 +70,7 @@
       <div class="ai-card" style="margin-bottom:1.5rem">
         <h3 style="margin-bottom:1rem">Cas d'utilisation</h3>
         <ul style="list-style:none;display:flex;flex-wrap:wrap;gap:0.5rem">
-          <% ai.use_cases.forEach(uc => { %>
+          <% (typeof ai.use_cases==="string"?JSON.parse(ai.use_cases||"[]"):ai.use_cases||[]).forEach(uc => { %>
             <li><span class="tag accent">✓ <%= uc %></span></li>
           <% }) %>
         </ul>

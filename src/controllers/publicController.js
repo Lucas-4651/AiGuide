@@ -8,12 +8,21 @@ const db = require('../config/database');
 const { recommend } = require('../services/recommenderService');
 
 exports.home = async (req, res, next) => {
-try {
-const [featured, settings, challenge] = await Promise.all([AI.featured(), Setting.getMap(), Challenge.today()]);
-const isDone = req.user ? await Challenge.isDoneToday(req.user.id) : false;
-const trending = await db('ai_tools').where({ is_active: true }).orderBy('view_count','desc').limit(3);
-res.render('pages/index', { title: settings.site_name || 'AI Guide', featured, settings });
-} catch (e) { next(e); }
+  try {
+    const [featured, settings, challenge] = await Promise.all([
+      AI.featured(), Setting.getMap(), Challenge.today()
+    ]);
+    const isDone   = req.user ? await Challenge.isDoneToday(req.user.id) : false;
+    const trending = await AI.all({});  // hydrateAI inclus, on prend les 8 premiers
+    res.render('pages/index', {
+      title: settings.site_name || 'AI Guide',
+      featured,
+      trending: trending.slice(0, 8),   // ← était manquant
+      settings,
+      challenge,                         // ← était manquant
+      isDone                             // ← était manquant
+    });
+  } catch (e) { next(e); }
 };
 
 exports.explore = async (req, res, next) => {
@@ -30,12 +39,19 @@ res.render('pages/explore', { title: 'Explorer les IAs', ais, types, filters });
 };
 
 exports.aiDetail = async (req, res, next) => {
-try {
-const ai = await AI.bySlug(req.params.slug);
-if (!ai) { req.flash('error', 'IA introuvable'); return res.redirect('/explore'); }
-await AI.incView(ai.id);
-res.render('pages/ai-detail', { title: ai.name + ' — Detail', ai });
-} catch (e) { next(e); }
+  try {
+    const ai = await AI.bySlug(req.params.slug);
+    if (!ai) { req.flash('error', 'IA introuvable'); return res.redirect('/explore'); }
+    await AI.incView(ai.id);
+    const [reviews, avgRating, reviewCount] = await Promise.all([
+      Review.forAI(ai.id), Review.avgRating(ai.id), Review.count(ai.id)
+    ]);
+    const myReview = req.user ? await Review.byUser(req.user.id, ai.id) : null;
+    res.render('pages/ai-detail', {
+      title: ai.name + ' — Détail', ai,
+      reviews, avgRating, reviewCount, myReview: myReview || null
+    });
+  } catch (e) { next(e); }
 };
 
 exports.tips = async (req, res, next) => {
@@ -98,51 +114,18 @@ res.render('pages/recommendations', { title: 'IAs recommandees', result, descrip
 
 // ─── NOUVEAUTÉS ────────────────────────────────────────────────
 exports.nouveautes = async (req, res, next) => {
-try {
-const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-const newAIs = await db('ai_tools')
-.where({ is_active: true })
-.where('created_at', '>=', oneMonthAgo)
-.orderBy('created_at', 'desc')
-.limit(20);
-
-const trending = await db('ai_tools')  
-  .where({ is_active: true })  
-  .orderBy('view_count', 'desc')  
-  .limit(8);  
-
-res.render('pages/nouveautes', {  
-  layout: 'layouts/main', title: 'Nouveautés',  
-  newAIs: newAIs.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
-  trending: trending.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
-});
-
-} catch (e) { next(e); }
+  try {
+    const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [allAIs, trending] = await Promise.all([ AI.all({}), AI.all({}) ]);
+    const newAIs = allAIs.filter(a => a.created_at >= oneMonthAgo).slice(0, 20);
+    res.render('pages/nouveautes', {
+      title: 'Nouveautés',
+      newAIs,
+      trending: trending.slice(0, 8)
+    });
+  } catch (e) { next(e); }
 };
 
-// ─── NOUVEAUTÉS ────────────────────────────────────────────────
-exports.nouveautes = async (req, res, next) => {
-try {
-const oneMonthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-const newAIs = await db('ai_tools')
-.where({ is_active: true })
-.where('created_at', '>=', oneMonthAgo)
-.orderBy('created_at', 'desc')
-.limit(20);
-
-const trending = await db('ai_tools')  
-  .where({ is_active: true })  
-  .orderBy('view_count', 'desc')  
-  .limit(8);  
-
-res.render('pages/nouveautes', {  
-  layout: 'layouts/main', title: 'Nouveautés',  
-  newAIs: newAIs.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
-  trending: trending.map(a => Object.assign({}, a, { tags: (() => { try { return JSON.parse(a.tags); } catch { return []; } })() })),  
-});
-
-} catch (e) { next(e); }
-};
 
 exports.saveProgress = async (req, res, next) => {
 try {
