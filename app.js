@@ -17,28 +17,32 @@ app.set('trust proxy', 1);
 
 // ── SESSION ────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
-  // Store PostgreSQL — évite le MemoryStore (leak mémoire en prod)
   const pgSession = require('connect-pg-simple')(session);
+  const pgPool = require('pg').Pool;
+  
+  const pool = new pgPool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false  // Important pour Render/Neon
+    }
+  });
+
   app.use(session({
     store: new pgSession({
-      conString: process.env.DATABASE_URL,
+      pool: pool,  // Utiliser un pool explicite
       tableName: 'user_sessions',
-      createTableIfMissing: true,   // crée la table auto au 1er démarrage
+      createTableIfMissing: true,
+      pruneSessionInterval: 60  // Nettoie les sessions expirées
     }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true, maxAge: 604800000, sameSite: 'lax' }
-  }));
-} else {
-  const SQLiteStore = require('connect-sqlite3')(session);
-  const store = new SQLiteStore({ db: 'sessions.sqlite', dir: '.' });
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'dev',
-    resave: false,
-    saveUninitialized: false,
-    store,
-    cookie: { maxAge: 604800000 }
+    cookie: { 
+      secure: true,  // true en production HTTPS
+      httpOnly: true, 
+      maxAge: 604800000,
+      sameSite: 'lax'
+    }
   }));
 }
 

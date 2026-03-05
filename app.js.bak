@@ -12,6 +12,9 @@ const { logger, activityLogger } = require('./src/middlewares/activityLogger');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+app.set('trust proxy', 1);  
+
 // ── SESSION ────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
   // Store PostgreSQL — évite le MemoryStore (leak mémoire en prod)
@@ -25,7 +28,7 @@ if (process.env.NODE_ENV === 'production') {
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true, httpOnly: true, maxAge: 604800000 }
+    cookie: { secure: false, httpOnly: true, maxAge: 604800000, sameSite: 'lax' }
   }));
 } else {
   const SQLiteStore = require('connect-sqlite3')(session);
@@ -60,7 +63,9 @@ app.use((req, res, next) => {
   res.locals.info_msg   = req.flash('info');
   res.locals.currentPath = req.path;
   next();
-});
+})
+
+
 app.use(activityLogger);
 app.use('/',         require('./src/routes/public'));
 app.use('/auth',     require('./src/routes/auth'));
