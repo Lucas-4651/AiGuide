@@ -42,11 +42,28 @@ function hydrateAI(ai) {
 }
 
 // ─── USER ─────────────────────────────────────────────────────
+// Dans src/models/index.js, remplacez la section USER par :
 const User = {
   findById   : (id)    => db('users').where({ id }).first(),
   findByEmail: (email) => db('users').where({ email: email.toLowerCase() }).first(),
-  create     : (data)  => db('users').insert(data),
-  update     : (id, data) => db('users').where({ id }).update(data),
+  
+  create: async (data) => {
+    // Renommer password en password_hash
+    if (data.password) {
+      data.password_hash = data.password;
+      delete data.password;
+    }
+    return db('users').insert(data);
+  },
+  
+  update: async (id, data) => {
+    if (data.password) {
+      data.password_hash = data.password;
+      delete data.password;
+    }
+    return db('users').where({ id }).update(data);
+  },
+  
   delete     : (id)    => db('users').where({ id }).delete(),
   count      : ()      => db('users').count('id as c').first().then(r => Number(r.c)),
   all        : (page, limit) =>

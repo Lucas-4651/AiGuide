@@ -29,7 +29,7 @@ function parseJSON(val, fallback) {
   // Pour tout autre type, retourner fallback
   return fallback;
 }
-}
+
 
 function hydrateAI(ai) {
   if (!ai) return null;
