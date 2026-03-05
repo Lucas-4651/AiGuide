@@ -67,43 +67,45 @@ app.use('/auth',     require('./src/routes/auth'));
 app.use('/generator',require('./src/routes/generator'));
 app.use('/admin', require('./src/routes/admin'));
 
-// ── REMPLACER LE LOGGER POUR LES ERREURS ─────────────────────
-// Sauvegarder l'original
-const originalLoggerError = logger.error;
+// ── GESTION D'ERREURS DÉTAILLÉE ─────────────────────────────
+// Capturer les exceptions non gérées
+process.on('uncaughtException', (err) => {
+  console.error('\n🔴 UNCAUGHT EXCEPTION:');
+  console.error('Message:', err.message);
+  console.error('Stack:', err.stack);
+  if (logger) logger.error('UNCAUGHT EXCEPTION: ' + err.message + '\n' + err.stack);
+});
 
-// Remplacer par une version plus verbose
-logger.error = function(msg) {
-  // Si c'est une erreur, afficher plus de détails
-  if (msg && msg instanceof Error) {
-    console.error('
-🔴 ERREUR DÉTAILLÉE:');
-    console.error('Message:', msg.message);
-    console.error('Stack:', msg.stack);
-    originalLoggerError.call(this, msg.message + '
-' + msg.stack);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n🔴 UNHANDLED REJECTION:');
+  console.error('Reason:', reason);
+  if (reason && reason.stack) {
+    console.error('Stack:', reason.stack);
+    if (logger) logger.error('UNHANDLED REJECTION: ' + reason.message + '\n' + reason.stack);
   } else {
-    originalLoggerError.call(this, msg);
+    if (logger) logger.error('UNHANDLED REJECTION: ' + JSON.stringify(reason));
   }
-};
+});
 
-// Afficher toutes les erreurs Express
+// Middleware de gestion d'erreurs Express (doit être APRÈS toutes les routes)
 app.use((err, req, res, next) => {
-  console.error('
-🔴 EXPRESS ERROR:');
+  console.error('\n🔴 EXPRESS ERROR:');
   console.error('URL:', req.url);
   console.error('Méthode:', req.method);
   console.error('Erreur:', err);
   console.error('Stack:', err.stack);
   
-  logger.error('Express error on ' + req.url + ': ' + err.message);
+  if (logger) logger.error('Express error on ' + req.url + ': ' + err.message);
+  
   res.status(500).render('pages/error', {
     title: 'Erreur',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Erreur serveur'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Une erreur est survenue'
   });
 });
 
-app.use((req, res) => res.status(404).render('pages/404', { title: '404' }));
-
+// 404 - Doit être APRÈS toutes les routes et AVANT le gestionnaire d'erreurs
+app.use((req, res) => {
+  res.status(404).render('pages/404', { title: '404' });
 });
 
 async function start() {
@@ -112,9 +114,11 @@ async function start() {
     logger.info('✅ DB connectée');
     app.listen(PORT, () => logger.info('🚀 Serveur sur http://localhost:' + PORT));
   } catch (e) {
-    logger.error('❌ DB connection failed: ' + e.message);
+    console.error('❌ DB connection failed:', e.message);
+    if (logger) logger.error('❌ DB connection failed: ' + e.message);
     process.exit(1);
   }
 }
 start();
+
 module.exports = app;
