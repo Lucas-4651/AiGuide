@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accès Administrateur — AI Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070d; --bg-2: #0e0e18; --bg-3: #16162a;
+      --border: #1e1e35; --text: #e8e8f0; --text-muted: #6b6b85;
+      --accent: #7c5cfc; --danger: #ff4d6d; --success: #00c97a;
+      --font-main: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-main); min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    body::after {
+      content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px; z-index: 0;
+      background: radial-gradient(ellipse, rgba(124,92,252,0.12), transparent 70%);
+    }
+    .wrap { position: relative; z-index: 1; width: 100%; max-width: 420px; padding: 1.5rem; }
+    .badge {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.25);
+      border-radius: 99px; padding: 0.35rem 1rem;
+      font-family: var(--font-mono); font-size: 0.72rem;
+      color: var(--danger); letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 1.5rem; text-align: center;
+    }
+    .card {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-top: 2px solid var(--accent); border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .logo {
+      width: 56px; height: 56px; margin: 0 auto 1rem;
+      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.4);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .header h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .header p  { color: var(--text-muted); font-size: 0.85rem; }
+    .alert {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.875rem; margin-bottom: 1.25rem;
+    }
+    .alert-error   { background: rgba(255,77,109,0.1);  border: 1px solid rgba(255,77,109,0.3);  color: var(--danger); }
+    .alert-success { background: rgba(0,201,122,0.1);   border: 1px solid rgba(0,201,122,0.3);   color: var(--success); }
+    .form { display: flex; flex-direction: column; gap: 1.1rem; }
+    .group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .group label {
+      font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    input[type="email"], input[type="password"] {
+      width: 100%; padding: 0.65rem 0.875rem;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: var(--font-main); font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,252,0.12); }
+    input::placeholder { color: var(--text-muted); }
+    button {
+      width: 100%; padding: 0.75rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: var(--font-main); font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+    }
+    button:hover { background: #6a4de8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,92,252,0.4); }
+    .footer {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.78rem; color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .footer a { color: var(--text-muted); }
+    .footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="badge">⬡ Zone d'accès restreint</div>
+    <div class="card">
+      <div class="header">
+        <div class="logo">⬡</div>
+        <h1>Administration</h1>
+        <p>AI Guide — Panneau de contrôle</p>
+      </div>
+
+      <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+        <div class="alert alert-error">⚠ <%= error_msg %></div>
+      <% } %>
+      <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+        <div class="alert alert-success">✓ <%= success_msg %></div>
+      <% } %>
+
+      <form action="/admin/login" method="POST" class="form">
+        <div class="group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="admin@exemple.com" required autocomplete="email" autofocus>
+        </div>
+        <div class="group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit">Accéder au panneau →</button>
+      </form>
+    </div>
+    <div class="footer">
+      <a href="/">← Retour au site public</a>
+    </div>
+  </div>
+</body>
+</html>

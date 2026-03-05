@@ -1,0 +1,43 @@
+<div class="sg">
+  <div class="sc"><div class="si p">🤖</div><div><div class="sv p"><%= stats.ais %></div><div class="sl">IAs enregistrées</div></div></div>
+  <div class="sc"><div class="si c">👥</div><div><div class="sv c"><%= stats.users %></div><div class="sl">Utilisateurs</div></div></div>
+  <div class="sc"><div class="si g">⚡</div><div><div class="sv g"><%= stats.prompts %></div><div class="sl">Prompts générés</div></div></div>
+  <div class="sc"><div class="si y">📋</div><div><div class="sv y"><%= stats.logs %></div><div class="sl">Actions loggées</div></div></div>
+</div>
+<div class="pg">
+  <div class="pn">
+    <div class="ph"><h3>Activité récente</h3><a href="/admin/logs">Tout voir →</a></div>
+    <table class="tbl">
+      <thead><tr><th>Action</th><th>IP</th><th>Date</th></tr></thead>
+      <tbody>
+        <% (recentLogs||[]).forEach(l=>{%>
+        <tr><td><code style="font-size:.72rem;color:var(--a2)"><%= l.action %></code></td><td class="tx-xs tx-m"><%= l.ip_address||'—' %></td><td class="tx-xs tx-m"><%= new Date(l.created_at).toLocaleString('fr') %></td></tr>
+        <%})%>
+        <%if(!recentLogs||!recentLogs.length){%><tr><td colspan="3" style="text-align:center;color:#50507a;padding:1.5rem">Aucune activité</td></tr><%}%>
+      </tbody>
+    </table>
+  </div>
+  <div class="pn">
+    <div class="ph"><h3>Top actions</h3></div>
+    <div class="pb">
+      <div class="sl-list">
+        <% (logStats||[]).slice(0,8).forEach(s=>{%>
+        <div class="sl-row"><span class="sl-act"><%= s.action %></span><span class="bx bx-c"><%= s.count %></span></div>
+        <%})%>
+        <%if(!logStats||!logStats.length){%><p class="tx-m tx-sm" style="text-align:center;padding:1rem">Aucune donnée</p><%}%>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="pn mt">
+  <div class="ph"><h3>Derniers prompts</h3><a href="/admin/prompts">Voir tous →</a></div>
+  <table class="tbl">
+    <thead><tr><th>Intention</th><th>IA cible</th><th>Modèle</th><th>Date</th></tr></thead>
+    <tbody>
+      <% (recentPrompts||[]).forEach(p=>{%>
+      <tr><td><%= (p.intention||'').slice(0,70) %><%= p.intention&&p.intention.length>70?'...':'' %></td><td><span class="tag"><%= p.target_ai||'—' %></span></td><td class="tx-xs tx-m"><%= p.model_used||'—' %></td><td class="tx-xs tx-m"><%= new Date(p.created_at).toLocaleString('fr') %></td></tr>
+      <%})%>
+      <%if(!recentPrompts||!recentPrompts.length){%><tr><td colspan="4" style="text-align:center;color:#50507a;padding:1.5rem">Aucun prompt</td></tr><%}%>
+    </tbody>
+  </table>
+</div>

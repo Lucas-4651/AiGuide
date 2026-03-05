@@ -1,0 +1,33 @@
+/* ── THEME ─────────────────────────────────────────── */
+const TK = 'aig-theme';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(TK, t);
+  const icon = t === 'dark' ? '☀️' : '🌙';
+  document.querySelectorAll('.th-btn, .auth-th').forEach(b => { b.textContent = icon; b.title = t === 'dark' ? 'Mode clair' : 'Mode sombre'; });
+}
+function toggleTheme() { applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+(function(){ applyTheme(localStorage.getItem(TK) || 'dark'); })();
+
+/* ── NAV MOBILE ─────────────────────────────────────── */
+const tog = document.getElementById('navTog');
+const nlinks = document.querySelector('.nav-links');
+if (tog && nlinks) {
+  tog.addEventListener('click', () => nlinks.classList.toggle('open'));
+  document.addEventListener('click', e => { if (!tog.contains(e.target) && !nlinks.contains(e.target)) nlinks.classList.remove('open'); });
+}
+
+/* ── ALERTS ─────────────────────────────────────────── */
+document.querySelectorAll('.alert').forEach(el => {
+  const btn = el.querySelector('.al-close');
+  if (btn) btn.addEventListener('click', () => el.remove());
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 5000);
+});
+
+/* ── SLUG AUTO ───────────────────────────────────────── */
+const ni = document.querySelector('input[name="name"]');
+const si = document.querySelector('input[name="slug"]');
+if (ni && si) {
+  ni.addEventListener('input', () => { if (!si.dataset.m) si.value = ni.value.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''); });
+  si.addEventListener('input', () => si.dataset.m = '1');
+}

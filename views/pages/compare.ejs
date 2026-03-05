@@ -1,0 +1,85 @@
+<!-- ============================================================
+     views/pages/compare.ejs  —  Comparateur d'IAs
+     ============================================================ -->
+<div class="page-header">
+  <h1>Comparer les IAs</h1>
+  <p>Compare 2 ou 3 outils IA cote a cote</p>
+</div>
+
+<% if (selected.length < 2) { %>
+<div class="compare-selector">
+  <p>Selectionne au moins 2 IAs a comparer depuis <a href="/explore">Explorer</a>, ou choisis ci-dessous :</p>
+  <div class="select-form" id="selectForm">
+    <select id="ai1" class="form-select">
+      <option value="">-- IA 1 --</option>
+      <% allAIs.forEach(ai => { %><option value="<%= ai.id %>"><%= ai.name %></option><% }) %>
+    </select>
+    <select id="ai2" class="form-select">
+      <option value="">-- IA 2 --</option>
+      <% allAIs.forEach(ai => { %><option value="<%= ai.id %>"><%= ai.name %></option><% }) %>
+    </select>
+    <select id="ai3" class="form-select">
+      <option value="">-- IA 3 (optionnel) --</option>
+      <% allAIs.forEach(ai => { %><option value="<%= ai.id %>"><%= ai.name %></option><% }) %>
+    </select>
+    <button onclick="startCompare()" class="btn btn-primary">Comparer</button>
+  </div>
+</div>
+<script>
+function startCompare() {
+  const ids = [document.getElementById('ai1').value, document.getElementById('ai2').value, document.getElementById('ai3').value].filter(Boolean);
+  if (ids.length >= 2) window.location = '/compare?ids=' + ids.join(',');
+  else alert('Selectionne au moins 2 IAs');
+}
+</script>
+
+<% } else { %>
+<div class="compare-table-wrap">
+  <a href="/compare" class="btn btn-ghost" style="margin-bottom:1rem">← Nouvelle comparaison</a>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Critere</th>
+        <% selected.forEach(ai => { %>
+        <th>
+          <div class="ai-logo" style="margin:0 auto 0.5rem;width:40px;height:40px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2))"><%= ai.name[0] %></div>
+          <%= ai.name %>
+        </th>
+        <% }) %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Type</td><% selected.forEach(ai => { %><td><span class="tag"><%= (ai.type||'').replace(/_/g,' ') %></span></td><% }) %></tr>
+      <tr><td>Prix</td><% selected.forEach(ai => { %><td><span class="pricing-<%= ai.pricing_type %>"><%= ai.pricing_type %></span><% if(ai.price_info){%><br><small class="text-muted"><%= ai.price_info %></small><%}%></td><% }) %></tr>
+      <tr><td>Niveau</td><% selected.forEach(ai => { %><td><span class="difficulty difficulty-<%= ai.difficulty_level %>"><%= ai.difficulty_level %></span></td><% }) %></tr>
+      <tr><td>Fournisseur</td><% selected.forEach(ai => { %><td><%= ai.provider || '—' %></td><% }) %></tr>
+      <tr>
+        <td>Points forts</td>
+        <% selected.forEach(ai => { %>
+        <td><ul class="compare-list green"><% (ai.strengths||[]).forEach(s=>{%><li><%= s %></li><%})%></ul></td>
+        <% }) %>
+      </tr>
+      <tr>
+        <td>Limites</td>
+        <% selected.forEach(ai => { %>
+        <td><ul class="compare-list red"><% (ai.limitations||[]).forEach(l=>{%><li><%= l %></li><%})%></ul></td>
+        <% }) %>
+      </tr>
+      <tr>
+        <td>Cas d'usage</td>
+        <% selected.forEach(ai => { %>
+        <td><ul class="compare-list"><% (ai.use_cases||[]).forEach(u=>{%><li><%= u %></li><%})%></ul></td>
+        <% }) %>
+      </tr>
+      <tr>
+        <td>Site</td>
+        <% selected.forEach(ai => { %>
+        <td><% if(ai.website_url){%><a href="<%= ai.website_url %>" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">Visiter →</a><%}else{%>—<%}%></td>
+        <% }) %>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+

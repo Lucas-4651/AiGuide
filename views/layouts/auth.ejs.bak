@@ -1,0 +1,85 @@
+<!-- ============================================================
+     views/layouts/auth.ejs  —  Layout simplifie pour login/register
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | AI Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <%- style %>
+</head>
+<body class="auth-body">
+  <%- include('../partials/flash') %>
+  <%- body %>
+  <script src="/js/main.js"></script>
+  <%- script %>
+</body>
+</html>
+
+
+<!-- ============================================================
+     views/layouts/admin.ejs  —  Layout panel admin avec sidebar
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Admin — AI Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <a href="/">◈ AI Guide</a>
+      <span class="badge-admin">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin" class="sidebar-link <%= currentPath === '/admin' ? 'active' : '' %>">📊 Dashboard</a>
+
+      <div class="sidebar-section">IAs</div>
+      <a href="/admin/ais"     class="sidebar-link <%= currentPath.startsWith('/admin/ais') ? 'active' : '' %>">🤖 Gestion IAs</a>
+      <a href="/admin/ais/new" class="sidebar-link">+ Ajouter une IA</a>
+
+      <div class="sidebar-section">Contenu</div>
+      <a href="/admin/content/flashcards" class="sidebar-link <%= currentPath.includes('flashcards') ? 'active' : '' %>">🃏 Flash Cards</a>
+      <a href="/admin/content/tips"       class="sidebar-link <%= currentPath.includes('tips') ? 'active' : '' %>">💡 Astuces</a>
+
+      <div class="sidebar-section">Utilisateurs</div>
+      <a href="/admin/users" class="sidebar-link <%= currentPath.startsWith('/admin/users') ? 'active' : '' %>">👥 Utilisateurs</a>
+
+      <div class="sidebar-section">Systeme</div>
+      <a href="/admin/logs"     class="sidebar-link <%= currentPath === '/admin/logs' ? 'active' : '' %>">📋 Logs & Metriques</a>
+      <a href="/admin/settings" class="sidebar-link <%= currentPath === '/admin/settings' ? 'active' : '' %>">⚙️ Parametres</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/"           class="btn btn-ghost btn-sm">Voir le site</a>
+      <a href="/auth/logout" class="btn btn-ghost btn-sm">Deconnexion</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1 class="admin-title"><%= title %></h1>
+      <div class="admin-user">
+        <% if (user) { %>
+          <span class="user-avatar"><%= user.username[0].toUpperCase() %></span>
+          <span><%= user.username %></span>
+        <% } %>
+      </div>
+    </header>
+    <div class="admin-content">
+      <%- include('../partials/flash') %>
+      <%- body %>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

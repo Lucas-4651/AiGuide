@@ -1,0 +1,260 @@
+// ============================================================
+//  src/controllers/generatorController.js
+// ============================================================
+const { generatePrompt } = require('../services/openrouterService');
+const { Prompt, User: UserModel, Badge, Collection } = require('../models');
+
+exports.showGenerator = async (req, res, next) => {
+  try {
+    const history = req.user ? await Prompt.forUser(req.user.id, 10) : [];
+    res.render('pages/generator', { title: 'Generateur de Prompts', history });
+  } catch (e) { 
+    next(e); 
+  }
+};
+
+exports.generate = async (req, res) => {
+  const { intention, target_ai, is_public } = req.body;
+
+  if (!intention || intention.trim().length < 5) {
+    return res.status(400).json({ 
+      error: 'Intention trop courte (min 5 caracteres)' 
+    });
+  }
+
+  const LIMIT = parseInt(process.env.GUEST_DAILY_PROMPT_LIMIT || '3');
+
+  const ip = (
+    req.headers['x-forwarded-for'] || 
+    req.connection.remoteAddress || 
+    ''
+  ).split(',')[0].trim();
+
+  // Limite invités par IP
+  if (!req.user) {
+    const count = await Prompt.guestCount(ip);
+
+    if (count >= LIMIT) {
+      return res.status(429).json({
+        error: 'Limite de ' + LIMIT + ' prompts/jour atteinte.',
+        limitReached: true
+      });
+    }
+  }
+
+  try {
+
+    const result = await generatePrompt(
+      intention.trim(), 
+      target_ai || null
+    );
+
+    const inserted = await Prompt.create({
+      user_id: req.user ? req.user.id : null,
+      intention: intention.trim(),
+      target_ai: target_ai || null,
+      generated_prompt: result.prompt,
+      model_used: result.model,
+      is_public: req.user && is_public ? 1 : 0,
+      guest_ip: !req.user ? ip : null,
+      created_at: new Date().toISOString()
+    });
+
+    const id = Array.isArray(inserted) ? inserted[0] : inserted;
+
+    if (req.user) {
+      await UserModel.incrementPromptCount(req.user.id);
+      await Badge.check(req.user.id).catch(()=>{});
+    }
+
+    res.json({
+      success: true,
+      prompt: result.prompt,
+      id,
+      tokens: result.tokens
+    });
+
+  } catch (e) {
+
+    res.status(500).json({
+      error: e.message || 'Erreur lors de la generation'
+    });
+
+  }
+};
+
+
+// ============================================================
+// RATE
+// ============================================================
+
+exports.rate = async (req, res) => {
+
+  const { id, rating } = req.body;
+  const r = parseInt(rating);
+
+  if (!id || !r || r < 1 || r > 5) {
+    return res.status(400).json({
+      error: 'Donnees invalides'
+    });
+  }
+
+  const prompt = await Prompt.findById(id);
+
+  if (!prompt) {
+    return res.status(404).json({
+      error: 'Prompt introuvable'
+    });
+  }
+
+  const ip = (
+    req.headers['x-forwarded-for'] ||
+    req.connection.remoteAddress ||
+    ''
+  ).split(',')[0].trim();
+
+  const ownsPrompt = req.user
+    ? prompt.user_id === req.user.id
+    : prompt.guest_ip === ip;
+
+  if (!ownsPrompt) {
+    return res.status(403).json({
+      error: 'Vous ne pouvez noter que vos propres prompts'
+    });
+  }
+
+  if (prompt.rating) {
+    return res.status(409).json({
+      error: 'Ce prompt a deja ete note'
+    });
+  }
+
+  await Prompt.rate(id, r);
+
+  res.json({ success: true });
+};
+
+
+// ============================================================
+// HISTORY
+// ============================================================
+
+exports.history = async (req, res, next) => {
+
+  try {
+
+    const { q, ai, from, to, format } = req.query;
+
+    let prompts = await Prompt.forUser(req.user.id, 200);
+
+    // filtres JS
+    if (q) {
+      prompts = prompts.filter(p =>
+        (p.intention + p.generated_prompt)
+        .toLowerCase()
+        .includes(q.toLowerCase())
+      );
+    }
+
+    if (ai) {
+      prompts = prompts.filter(p => p.target_ai === ai);
+    }
+
+    if (from) {
+      prompts = prompts.filter(p =>
+        new Date(p.created_at) >= new Date(from)
+      );
+    }
+
+    if (to) {
+      prompts = prompts.filter(p =>
+        new Date(p.created_at) <= new Date(to + 'T23:59:59')
+      );
+    }
+
+
+    // ===============================
+    // EXPORT MARKDOWN
+    // ===============================
+    if (format === 'md') {
+
+      const md = prompts.map(p => {
+
+        return `## ${p.intention}
+
+**IA :** ${p.target_ai || '—'} | **Date :** ${new Date(p.created_at).toLocaleDateString('fr')}
+
+\`\`\`
+${p.generated_prompt}
+\`\`\`
+`;
+
+      }).join('\n\n---\n\n');
+
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="prompts.md"'
+      );
+
+      res.setHeader(
+        'Content-Type',
+        'text/markdown'
+      );
+
+      return res.send(md);
+    }
+
+
+    // ===============================
+    // EXPORT TXT
+    // ===============================
+    if (format === 'txt') {
+
+      const txt = prompts.map(p => {
+
+        return `[${new Date(p.created_at).toLocaleDateString('fr')}] ${p.intention}
+
+${p.generated_prompt}`;
+
+      }).join('\n\n========\n\n');
+
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="prompts.txt"'
+      );
+
+      res.setHeader(
+        'Content-Type',
+        'text/plain'
+      );
+
+      return res.send(txt);
+    }
+
+
+    const ais = [
+      ...new Set(
+        prompts.map(p => p.target_ai).filter(Boolean)
+      )
+    ];
+
+    const collections = await Collection.forUser(req.user.id);
+
+    res.render('pages/prompt-history', {
+      title: 'Historique des prompts',
+      prompts,
+      ais,
+      q,
+      ai,
+      from,
+      to,
+      collections
+    });
+
+  } catch (e) {
+
+    next(e);
+
+  }
+
+};

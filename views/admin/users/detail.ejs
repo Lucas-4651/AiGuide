@@ -1,0 +1,60 @@
+<div class="tb2"><div class="tb2-l"><a href="/admin/users" class="btn btn-o btn-sm">← Retour</a></div></div>
+<div style="display:grid;grid-template-columns:280px 1fr;gap:1.25rem;align-items:start">
+  <div>
+    <div class="pn" style="margin-bottom:1rem">
+      <div class="pb" style="text-align:center;padding:1.5rem">
+        <div class="sb-av" style="width:56px;height:56px;font-size:1.3rem;margin:0 auto 1rem"><%= u.username[0].toUpperCase() %></div>
+        <div style="font-size:1rem;font-weight:700"><%= u.username %></div>
+        <div class="tx-sm tx-m"><%= u.email %></div>
+        <div style="margin-top:.75rem;display:flex;gap:.5rem;justify-content:center">
+          <span class="bx bx-<%= u.role==='admin'?'a':'u' %>"><%= u.role %></span>
+          <span class="<%= u.is_active?'on-dot':'off-dot' %>"><%= u.is_active?'● Actif':'● Banni' %></span>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--bd);padding:.875rem 1rem">
+        <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.78rem">
+          <div style="display:flex;justify-content:space-between"><span class="tx-m">Auth</span><span><%= u.oauth_provider||'local' %></span></div>
+          <div style="display:flex;justify-content:space-between"><span class="tx-m">Prompts aujourd'hui</span><span><%= u.daily_prompt_count||0 %></span></div>
+          <div style="display:flex;justify-content:space-between"><span class="tx-m">Inscrit le</span><span><%= new Date(u.created_at).toLocaleDateString('fr') %></span></div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--bd);padding:.75rem">
+        <form action="/admin/users/<%= u.id %>/toggle" method="POST" style="margin-bottom:.4rem">
+          <button class="btn btn-sm btn-w <%= u.is_active?'btn-r':'btn-g' %>"><%= u.is_active?'Bannir':'Réactiver' %></button>
+        </form>
+        <form action="/admin/users/<%= u.id %>/role" method="POST" style="margin-bottom:.4rem">
+          <button class="btn btn-sm btn-y btn-w"><%= u.role==='admin'?'Retirer admin':'Rendre admin' %></button>
+        </form>
+        <form action="/admin/users/<%= u.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Supprimer définitivement ?')">
+          <button class="btn btn-sm btn-r btn-w">Supprimer le compte</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="pn" style="margin-bottom:1rem">
+      <div class="ph"><h3>Prompts générés (<%= prompts.length %>)</h3></div>
+      <table class="tbl">
+        <thead><tr><th>Intention</th><th>IA cible</th><th>Note</th><th>Date</th></tr></thead>
+        <tbody>
+          <% (prompts||[]).forEach(p=>{%>
+          <tr><td class="tx-sm"><%= (p.intention||'').slice(0,60) %>...</td><td><span class="tag"><%= p.target_ai||'—' %></span></td><td class="tx-sm"><%= p.rating?p.rating+'/5':'—' %></td><td class="tx-xs tx-m"><%= new Date(p.created_at).toLocaleString('fr') %></td></tr>
+          <%})%>
+          <%if(!prompts.length){%><tr><td colspan="4" style="text-align:center;color:#50507a;padding:1.5rem">Aucun prompt</td></tr><%}%>
+        </tbody>
+      </table>
+    </div>
+    <div class="pn">
+      <div class="ph"><h3>Activité (<%= logs.length %>)</h3></div>
+      <table class="tbl">
+        <thead><tr><th>Action</th><th>IP</th><th>Date</th></tr></thead>
+        <tbody>
+          <% (logs||[]).slice(0,20).forEach(l=>{%>
+          <tr><td><code style="font-size:.7rem;color:var(--a2)"><%= l.action %></code></td><td class="tx-xs tx-m"><%= l.ip_address||'—' %></td><td class="tx-xs tx-m"><%= new Date(l.created_at).toLocaleString('fr') %></td></tr>
+          <%})%>
+          <%if(!logs.length){%><tr><td colspan="3" style="text-align:center;color:#50507a;padding:1.5rem">Aucune activité</td></tr><%}%>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

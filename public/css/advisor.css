@@ -1,0 +1,172 @@
+/* ============================================================
+   advisor.css - Styles pour la page IA Advisor
+   ============================================================ */
+
+/* Radio cards */
+.radio-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .25rem;
+  padding: 1rem .5rem;
+  background: var(--bg3);
+  border: 2px solid var(--bd);
+  border-radius: var(--rs);
+  cursor: pointer;
+  transition: all .15s ease;
+  position: relative;
+}
+
+.radio-card:hover {
+  border-color: var(--ac);
+  transform: translateY(-2px);
+}
+
+.radio-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-card:has(.radio-hidden:checked) {
+  border-color: var(--ac);
+  background: rgba(124, 92, 252, 0.05);
+}
+
+.radio-label {
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.radio-hint {
+  font-size: .7rem;
+  color: var(--t2);
+}
+
+/* Score badge */
+.score-badge {
+  font-size: .7rem;
+  padding: .18rem .5rem;
+  background: rgba(124, 92, 252, 0.1);
+  color: var(--ac);
+  border-radius: 99px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Top match card */
+.top-match {
+  position: relative;
+  box-shadow: 0 0 0 2px rgba(124, 92, 252, 0.3);
+}
+
+/* Grille IA (réutilisation mais spécifique si besoin) */
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.ai-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 1.25rem;
+  transition: all .2s ease;
+}
+
+.ai-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  border-color: var(--ac);
+}
+
+.ai-card-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+
+.ai-logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.ai-meta {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.ai-name {
+  font-weight: 700;
+  margin-bottom: .1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-name a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ai-type {
+  font-size: .7rem;
+  color: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.ai-desc {
+  font-size: .85rem;
+  color: var(--t2);
+  line-height: 1.5;
+  margin: .5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.ai-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: .75rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--bd);
+}
+
+.tag {
+  font-size: .65rem;
+  padding: .2rem .5rem;
+  background: var(--bg3);
+  border-radius: 99px;
+  color: var(--t2);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .radio-hint {
+    display: none;
+  }
+  
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+}

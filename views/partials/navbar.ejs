@@ -1,0 +1,70 @@
+<!-- ============================================================
+     views/partials/navbar.ejs
+     Barre de navigation principale
+     ============================================================ -->
+<nav class="navbar">
+  <div class="nav-wrap">
+    
+    <!-- Logo / Brand -->
+    <a href="/" class="nav-brand">
+      <span class="brand-dot">◈</span>
+      <span>AI <span class="brand-acc">Guide</span></span>
+    </a>
+    
+    <!-- Navigation links (desktop) -->
+    <div class="nav-links" id="navLinks">
+      <a href="/explore"    class="nav-link <%= currentPath && currentPath.startsWith('/explore') ? 'on' : '' %>">Explorer</a>
+      <a href="/generator"  class="nav-link <%= currentPath && currentPath.startsWith('/generator') ? 'on' : '' %>">Générateur</a>
+      <a href="/flashcards" class="nav-link <%= currentPath && currentPath === '/flashcards' ? 'on' : '' %>">Flash Cards</a>
+      <a href="/roadmap"    class="nav-link <%= currentPath && currentPath === '/roadmap' ? 'on' : '' %>">Roadmap</a>
+      <a href="/tips"       class="nav-link <%= currentPath && currentPath === '/tips' ? 'on' : '' %>">Astuces</a>
+      <a href="/advisor"    class="nav-link <%= currentPath && currentPath.startsWith('/advisor') ? 'on' : '' %>">Advisor</a>
+      <a href="/nouveautes" class="nav-link <%= currentPath && currentPath === '/nouveautes' ? 'on' : '' %>">Nouveautés</a>
+      <a href="/compare"    class="nav-link <%= currentPath && currentPath === '/compare' ? 'on' : '' %>">Comparer</a>
+    </div>
+    
+    <!-- Right side actions -->
+    <div class="nav-right">
+      
+      <!-- Search button - MODERN STYLE -->
+      <button class="search-trigger" onclick="openSearch()" aria-label="Rechercher">
+        <span class="search-trigger-icon">
+          <i class="lucide-search"></i>
+        </span>
+        <span class="search-trigger-text">Rechercher...</span>
+        <span class="search-trigger-kbd">
+          <kbd>⌘</kbd> <kbd>K</kbd>
+        </span>
+      </button>
+      
+      <!-- Theme toggle -->
+      <button class="theme-btn" onclick="toggleTheme()" title="Changer le thème" id="themeBtn">🌙</button>
+      
+      <!-- User menu / Auth buttons -->
+      <% if(user){ %>
+        <% if(isAdmin){ %>
+          <a href="/admin" class="btn btn-adm btn-sm">⚙ Admin</a>
+        <% } %>
+        
+        <div class="nav-user">
+          <div class="u-av"><%= user.username[0].toUpperCase() %></div>
+          <div class="u-drop">
+            <span class="u-name"><%= user.username %></span>
+            <a href="/profile">Mon Profil</a>
+            <a href="/favorites">Mes Favoris</a>
+            <a href="/generator/history">Mes prompts</a>
+            <a href="/auth/logout">Déconnexion</a>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/auth/login"    class="btn btn-gh btn-sm">Connexion</a>
+        <a href="/auth/register" class="btn btn-p btn-sm">Inscription</a>
+      <% } %>
+    </div>
+    
+    <!-- Mobile hamburger -->
+    <button class="nav-tog" id="navTog" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>

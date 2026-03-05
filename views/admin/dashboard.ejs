@@ -1,0 +1,59 @@
+<div class="sg">
+  <div class="sc"><div class="si p">🤖</div><div><div class="sv p"><%= stats.ais %></div><div class="sl">IAs</div></div></div>
+  <div class="sc"><div class="si c">👥</div><div><div class="sv c"><%= stats.users %></div><div class="sl">Utilisateurs</div></div></div>
+  <div class="sc"><div class="si g">⚡</div><div><div class="sv g"><%= stats.prompts %></div><div class="sl">Prompts</div></div></div>
+  <div class="sc"><div class="si y">📋</div><div><div class="sv y"><%= stats.logs %></div><div class="sl">Logs</div></div></div>
+</div>
+
+<div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:.55rem">Accès rapide</div>
+<div class="ql-grid">
+  <a href="/admin/ais/new"              class="ql"><span class="qi">➕</span> Ajouter IA</a>
+  <a href="/admin/ais"                  class="ql"><span class="qi">🤖</span> Gérer IAs</a>
+  <a href="/admin/roadmaps/new"         class="ql"><span class="qi">🗺️</span> Nouvelle Roadmap</a>
+  <a href="/admin/roadmaps"             class="ql"><span class="qi">📚</span> Roadmaps</a>
+  <a href="/admin/content/flashcards"   class="ql"><span class="qi">🃏</span> Flash Cards</a>
+  <a href="/admin/content/tips"         class="ql"><span class="qi">💡</span> Astuces</a>
+  <a href="/admin/users"                class="ql"><span class="qi">👥</span> Utilisateurs</a>
+  <a href="/admin/prompts"              class="ql"><span class="qi">⚡</span> Prompts</a>
+  <a href="/admin/logs"                 class="ql"><span class="qi">📋</span> Logs</a>
+  <a href="/admin/settings"             class="ql"><span class="qi">⚙️</span> Paramètres</a>
+</div>
+
+<div class="pg">
+  <div class="pn">
+    <div class="ph"><h3>Activité récente</h3><a href="/admin/logs">Voir tout →</a></div>
+    <table class="tbl">
+      <thead><tr><th>Action</th><th>IP</th><th>Date</th></tr></thead>
+      <tbody>
+        <% (recentLogs||[]).forEach(l=>{ %>
+        <tr><td><code><%= l.action %></code></td><td class="tx-xs tx-m"><%= l.ip_address||'—' %></td><td class="tx-xs tx-m"><%= new Date(l.created_at).toLocaleString('fr') %></td></tr>
+        <% }) %>
+        <% if(!recentLogs||!recentLogs.length){ %><tr><td colspan="3" style="text-align:center;color:var(--mu);padding:1.25rem">Aucune activité</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="pn">
+    <div class="ph"><h3>Top actions</h3></div>
+    <div class="pb">
+      <div class="sl-list">
+        <% (logStats||[]).slice(0,8).forEach(s=>{ %>
+        <div class="sl-row"><span class="sl-act"><%= s.action %></span><span class="bx bx-c"><%= s.count %></span></div>
+        <% }) %>
+        <% if(!logStats||!logStats.length){ %><p class="tx-m tx-sm" style="text-align:center;padding:.9rem">Aucune donnée</p><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pn mt">
+  <div class="ph"><h3>Derniers prompts</h3><a href="/admin/prompts">Voir tous →</a></div>
+  <table class="tbl">
+    <thead><tr><th>Intention</th><th>IA cible</th><th>Modèle</th><th>Date</th></tr></thead>
+    <tbody>
+      <% (recentPrompts||[]).forEach(p=>{ %>
+      <tr><td class="tx-sm"><%= (p.intention||'').slice(0,65) %><%= p.intention&&p.intention.length>65?'...':'' %></td><td><span class="tag"><%= p.target_ai||'—' %></span></td><td class="tx-xs tx-m"><%= p.model_used||'—' %></td><td class="tx-xs tx-m"><%= new Date(p.created_at).toLocaleString('fr') %></td></tr>
+      <% }) %>
+      <% if(!recentPrompts||!recentPrompts.length){ %><tr><td colspan="4" style="text-align:center;color:var(--mu);padding:1.25rem">Aucun prompt</td></tr><% } %>
+    </tbody>
+  </table>
+</div>

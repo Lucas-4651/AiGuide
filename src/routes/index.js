@@ -1,0 +1,86 @@
+const express  = require('express');
+const passport = require('passport');
+const { body } = require('express-validator');
+const { isAuth, isAdmin, isGuest } = require('../middlewares/auth');
+const authCtrl   = require('../controllers/authController');
+const publicCtrl = require('../controllers/publicController');
+const genCtrl    = require('../controllers/generatorController');
+const adminCtrl  = require('../controllers/adminController');
+
+function createPublicRouter() {
+  const r = express.Router();
+  r.get('/',            publicCtrl.home);
+  r.get('/explore',     publicCtrl.explore);
+  r.get('/explore/:slug', publicCtrl.aiDetail);
+  r.get('/tips',        publicCtrl.tips);
+  r.get('/flashcards',  publicCtrl.flashcards);
+  r.get('/roadmap',     publicCtrl.roadmap);
+  r.get('/roadmap/:id', publicCtrl.roadmapDetail);
+  r.get('/compare',     publicCtrl.compare);
+  r.post('/recommend',  publicCtrl.recommendPost);
+  return r;
+}
+
+function createAuthRouter() {
+  const r = express.Router();
+  r.get('/login',    isGuest, authCtrl.showLogin);
+  r.post('/login',   isGuest, authCtrl.login);
+  r.get('/register', isGuest, authCtrl.showRegister);
+  r.post('/register', isGuest,
+    body('email').isEmail().withMessage('Email invalide'),
+    body('password').isLength({ min: 6 }).withMessage('Mot de passe min 6 chars'),
+    body('username').notEmpty().withMessage('Pseudo requis'),
+    authCtrl.register);
+  r.get('/logout', authCtrl.logout);
+  r.get('/google',          passport.authenticate('google', { scope: ['profile', 'email'] }));
+  r.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), authCtrl.googleCallback);
+  r.get('/github',          passport.authenticate('github', { scope: ['user:email'] }));
+  r.get('/github/callback', passport.authenticate('github', { failureRedirect: '/auth/login' }), authCtrl.githubCallback);
+  return r;
+}
+
+function createGeneratorRouter() {
+  const r = express.Router();
+  r.get('/',          genCtrl.showGenerator);
+  r.post('/generate', genCtrl.generate);
+  r.post('/rate',     genCtrl.rate);
+  r.get('/history',   isAuth, genCtrl.history);
+  return r;
+}
+
+function createAdminRouter() {
+  const r = express.Router();
+
+  // ⚠️  Ces 3 routes DOIVENT être AVANT r.use(isAdmin)
+  r.get('/login',  adminCtrl.showAdminLogin);
+  r.post('/login', adminCtrl.adminLogin);
+  r.get('/logout', adminCtrl.adminLogout);
+
+  // Toutes les routes en dessous exigent role=admin
+  r.use(isAdmin);
+
+  r.get('/', adminCtrl.dashboard);
+  r.get('/ais',           adminCtrl.listAIs);
+  r.get('/ais/new',       adminCtrl.newAIForm);
+  r.post('/ais',          adminCtrl.createAI);
+  r.get('/ais/:id/edit',  adminCtrl.editAIForm);
+  r.put('/ais/:id',       adminCtrl.updateAI);
+  r.delete('/ais/:id',    adminCtrl.deleteAI);
+  r.get('/users',                 adminCtrl.listUsers);
+  r.post('/users/:id/toggle',     adminCtrl.toggleUser);
+  r.post('/users/:id/role',       adminCtrl.changeRole);
+  r.get('/logs',                  adminCtrl.logs);
+  r.get('/content/flashcards',    adminCtrl.listFlashCards);
+  r.post('/content/flashcards',   adminCtrl.createFlashCard);
+  r.put('/content/flashcards/:id', adminCtrl.updateFlashCard);
+  r.delete('/content/flashcards/:id', adminCtrl.deleteFlashCard);
+  r.get('/content/tips',          adminCtrl.listTips);
+  r.post('/content/tips',         adminCtrl.createTip);
+  r.delete('/content/tips/:id',   adminCtrl.deleteTip);
+  r.get('/settings',  adminCtrl.settings);
+  r.post('/settings', adminCtrl.updateSettings);
+
+  return r;
+}
+
+module.exports = { createPublicRouter, createAuthRouter, createGeneratorRouter, createAdminRouter };

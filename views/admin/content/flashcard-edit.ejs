@@ -1,0 +1,23 @@
+<div class="tb2"><div class="tb2-l"><a href="/admin/content/flashcards" class="btn btn-o btn-sm">← Retour</a></div></div>
+<div class="pn" style="max-width:600px"><div class="pb">
+<form action="/admin/content/flashcards/<%= card.id %>?_method=PUT" method="POST" class="form">
+  <div class="fgrp"><label>Terme *</label><input type="text" name="term" value="<%= card.term %>" class="fi" required></div>
+  <div class="fgrp"><label>Définition *</label><textarea name="definition" class="ft" rows="4" required><%= card.definition %></textarea></div>
+  <div class="fgrp"><label>Exemple</label><textarea name="example" class="ft" rows="2"><%= card.example||'' %></textarea></div>
+  <div class="fg">
+    <div class="fgrp"><label>Catégorie</label><input type="text" name="category" value="<%= card.category %>" class="fi"></div>
+    <div class="fgrp"><label>Difficulté</label>
+      <select name="difficulty" class="fs">
+        <option value="1" <%=card.difficulty==1?'selected':''%>>1 — Débutant</option>
+        <option value="2" <%=card.difficulty==2?'selected':''%>>2 — Intermédiaire</option>
+        <option value="3" <%=card.difficulty==3?'selected':''%>>3 — Avancé</option>
+      </select>
+    </div>
+    <div class="fgrp"><label>Ordre</label><input type="number" name="order_index" value="<%= card.order_index||0 %>" class="fi"></div>
+  </div>
+  <div class="fa">
+    <a href="/admin/content/flashcards" class="btn btn-o">Annuler</a>
+    <button type="submit" class="btn btn-p">💾 Sauvegarder</button>
+  </div>
+</form>
+</div></div>

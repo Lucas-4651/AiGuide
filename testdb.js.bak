@@ -1,0 +1,14 @@
+const { Pool } = require('pg');
+const pool = new Pool({
+  connectionString: 'postgresql://neondb_owner:npg_PF4VGoaJ6TLe@ep-rough-voice-aigore1a-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require',
+  connectionTimeoutMillis: 30000, // 30 secondes
+  ssl: {
+    rejectUnauthorized: false  // Force SSL même si problème
+  }
+});
+
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) console.error('Erreur:', err);
+  else console.log('Connecté!', res.rows[0]);
+  pool.end();
+});

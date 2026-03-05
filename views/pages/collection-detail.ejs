@@ -1,0 +1,32 @@
+<div style="max-width:860px;margin:0 auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem">
+    <div><a href="/collections" class="btn btn-gh btn-sm" style="margin-bottom:.5rem">← Retour</a><h1 style="font-size:1.3rem;font-weight:800"><%= col.name %></h1><div style="font-size:.75rem;color:var(--mu);margin-top:.2rem"><%= col.is_public?'🌐 Publique':'🔒 Privée' %></div></div>
+    <% if(typeof user!=='undefined'&&user&&col.is_public){ %>
+    <button onclick="navigator.clipboard.writeText(window.location.href);this.textContent='✓ Copié !';setTimeout(()=>this.textContent='🔗 Partager',2000)" class="btn btn-gh btn-sm">🔗 Partager</button>
+    <% } %>
+  </div>
+  <% if(prompts.length){ %>
+  <div style="display:flex;flex-direction:column;gap:.875rem">
+    <% prompts.forEach(p=>{ %>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem">
+        <div style="flex:1">
+          <div style="font-size:.8rem;font-weight:600;margin-bottom:.25rem"><%= p.intention.slice(0,80) %>...</div>
+          <div style="font-size:.7rem;color:var(--mu)"><%= p.target_ai||'—' %> · <%= new Date(p.created_at).toLocaleDateString('fr') %></div>
+        </div>
+        <div style="display:flex;gap:.35rem">
+          <button onclick="copyPr(this,'<%= encodeURIComponent(p.generated_prompt) %>')" class="btn btn-xs btn-gh">Copier</button>
+          <% if(typeof user!=='undefined'&&user&&col.user_id===user.id){ %>
+          <form action="/collections/<%= col.id %>/remove/<%= p.id %>?_method=POST" method="POST" style="display:inline"><button class="btn btn-xs btn-re">✕</button></form>
+          <% } %>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:.75rem;font-family:var(--mo);font-size:.78rem;line-height:1.6;white-space:pre-wrap;max-height:120px;overflow:hidden;cursor:pointer" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'120px':'none'"><%= p.generated_prompt %></div>
+    </div>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <div class="empty"><span class="empty-ico">📂</span><p>Collection vide. Ajoute des prompts depuis <a href="/generator/history">l'historique</a>.</p></div>
+  <% } %>
+</div>
+<script>function copyPr(btn, enc){ navigator.clipboard.writeText(decodeURIComponent(enc));btn.textContent='✓';setTimeout(()=>btn.textContent='Copier',2000); }</script>

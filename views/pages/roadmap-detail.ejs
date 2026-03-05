@@ -1,0 +1,85 @@
+<!-- ============================================================
+     views/pages/roadmap-detail.ejs  —  Detail d'une roadmap
+     ============================================================ -->
+<div class="page-header" style="text-align:left;max-width:800px;margin:0 auto">
+  <a href="/roadmap" class="btn btn-ghost btn-sm" style="margin-bottom:1rem">← Retour</a>
+  <span class="roadmap-level"><%= roadmap.level %></span>
+  <h1 style="margin-top:0.5rem"><%= roadmap.title %></h1>
+  <p><%= roadmap.description %></p>
+  <% if (roadmap.estimated_duration) { %>
+    <p class="text-muted" style="margin-top:0.5rem">⏱ Duree estimee : <%= roadmap.estimated_duration %></p>
+  <% } %>
+</div>
+
+<div style="max-width:800px;margin:2rem auto">
+  <% if (!roadmap.steps || roadmap.steps.length === 0) { %>
+  <div class="empty-state"><p>Aucune etape definie pour cette roadmap</p></div>
+  <% } else { %>
+  <div style="display:flex;flex-direction:column;gap:1rem;position:relative">
+    <% roadmap.steps.forEach((step, i) => { %>
+    <div class="ai-card" style="display:flex;gap:1.5rem;border-left:3px solid var(--ac);transition:opacity .2s" id="step-<%= i %>" onclick="toggleStep(<%= i %>)" data-done="<%= (typeof completed!=='undefined'&&completed.includes(i)).toString() %>" style="cursor:pointer">
+      <div style="font-family:var(--font-mono);font-size:1.5rem;font-weight:800;color:var(--accent);min-width:40px;text-align:center">
+        <%= String(i + 1).padStart(2, '0') %>
+      </div>
+      <div style="flex:1">
+        <h3 style="margin-bottom:0.4rem"><%= step.title %></h3>
+        <p style="color:var(--text-muted);font-size:0.9rem"><%= step.description %></p>
+        <% if (step.resource) { %>
+          <a href="<%= step.resource %>" class="btn btn-sm btn-ghost" style="margin-top:0.75rem"
+            <%= step.resource.startsWith('http') ? 'target="_blank" rel="noopener"' : '' %>>
+            <%= step.resource.startsWith('http') ? 'Visiter →' : 'Aller →' %>
+          </a>
+        <% } %>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+
+
+<% if(typeof user!=='undefined'&&user){ %>
+<div id="progressBar" style="position:sticky;bottom:1rem;max-width:800px;margin:1.5rem auto 0">
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:99px;padding:.65rem 1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:var(--sh)">
+    <span style="font-size:.8rem;font-weight:600" id="progText">0 / <%= roadmap.steps?roadmap.steps.length:0 %> étapes</span>
+    <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div id="progFill" style="height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .4s;width:0%"></div></div>
+    <span id="progPct" style="font-size:.78rem;color:var(--mu)">0%</span>
+  </div>
+</div>
+<% } %>
+<script>
+const COMPLETED = <%- JSON.stringify(typeof completed!=='undefined'?completed:[]) %>;
+const TOTAL = <%= roadmap.steps?roadmap.steps.length:0 %>;
+const RM_ID = <%= roadmap.id %>;
+let done = new Set(COMPLETED);
+
+function render() {
+  document.querySelectorAll('[id^="step-"]').forEach(el => {
+    const i = parseInt(el.id.split('-')[1]);
+    el.style.opacity = done.has(i) ? '.5' : '1';
+    const num = el.querySelector('[data-num]');
+    if (num) num.textContent = done.has(i) ? '✓' : String(i+1).padStart(2,'0');
+    el.style.borderLeftColor = done.has(i) ? 'var(--gr)' : 'var(--ac)';
+  });
+  const pct = TOTAL ? Math.round(done.size/TOTAL*100) : 0;
+  const pt = document.getElementById('progText');
+  const pf = document.getElementById('progFill');
+  const pp = document.getElementById('progPct');
+  if (pt) pt.textContent = done.size + ' / ' + TOTAL + ' étapes';
+  if (pf) pf.style.width = pct + '%';
+  if (pp) pp.textContent = pct + '%';
+}
+
+async function toggleStep(i) {
+  <% if(typeof user!=='undefined'&&user){ %>
+  if (done.has(i)) done.delete(i); else done.add(i);
+  render();
+  await fetch('/api/roadmap/progress', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ roadmap_id: RM_ID, steps: [...done] }) });
+  <% } else { %>
+  window.location = '/auth/login';
+  <% } %>
+}
+
+render();
+</script>

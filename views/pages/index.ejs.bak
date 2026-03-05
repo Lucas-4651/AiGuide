@@ -1,0 +1,101 @@
+<!-- ============================================================
+     views/pages/index.ejs  —  Homepage
+     ============================================================ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Plateforme d'apprentissage IA</div>
+    <h1 class="hero-title">Du <span class="accent">débutant</span><br>à l'<span class="accent">expert</span> en IA</h1>
+    <p class="hero-desc">Explore tous les outils d'IA, génère des prompts optimisés, suis ta roadmap personnalisée et maîtrise les concepts essentiels.</p>
+    <div class="hero-actions">
+      <a href="/explore"   class="btn btn-primary btn-lg">🔍 Explorer les IAs</a>
+      <a href="/generator" class="btn btn-ghost btn-lg">⚡ Générateur de Prompts</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num"><%= featured.length %>+</span><span>IAs répertoriées</span></div>
+      <div class="stat"><span class="stat-num">100%</span><span>Dynamique</span></div>
+      <div class="stat"><span class="stat-num">Free</span><span>Accès gratuit</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- DÉFI DU JOUR -->
+<% if(typeof challenge !== 'undefined' && challenge){ %>
+<section style="background:var(--bg2);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)">
+  <div class="sec" style="padding-top:2rem;padding-bottom:2rem">
+    <div style="max-width:720px;margin:0 auto;text-align:center">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ac);margin-bottom:.75rem">🎯 Défi du jour</div>
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem"><%= challenge.challenge_text %></p>
+      <p class="text-muted text-sm" style="margin-bottom:1.25rem">Relève le défi pour augmenter ton streak 🔥</p>
+      <% if(typeof isDone !== 'undefined' && isDone){ %>
+        <span style="color:var(--gr);font-weight:700">✓ Défi déjà complété aujourd'hui !</span>
+      <% } else if(typeof user !== 'undefined' && user){ %>
+        <button onclick="completeDailyChallenge()" class="btn btn-p" id="challengeBtn">✓ Marquer comme complété</button>
+        <div id="challengeMessage" style="margin-top:0.5rem;"></div>
+      <% } else { %>
+        <a href="/auth/login" class="btn btn-p">Connecte-toi pour participer</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<section class="features-section">
+  <div class="section-container">
+    <h2 class="section-title">Ce que tu peux faire ici</h2>
+    <div class="features-grid">
+      <a href="/explore"   class="feature-card" aria-label="Explorer les IAs"><span class="feature-icon">🔍</span><h3>Explorer</h3><p>Découvre tous les types d'IAs avec filtres par usage, prix et difficulté</p></a>
+      <a href="/generator" class="feature-card" aria-label="Générateur de prompts"><span class="feature-icon">⚡</span><h3>Générer des Prompts</h3><p>Transforme ton intention en prompt optimisé grâce à l'IA</p></a>
+      <a href="/compare"   class="feature-card" aria-label="Comparer les IAs"><span class="feature-icon">⚖️</span><h3>Comparer</h3><p>Compare 2 ou 3 IAs côte à côte pour faire le bon choix</p></a>
+      <a href="/roadmap"   class="feature-card" aria-label="Roadmap d'apprentissage"><span class="feature-icon">🗺️</span><h3>Roadmap</h3><p>Suis un parcours structuré selon ton niveau et tes objectifs</p></a>
+      <a href="/flashcards" class="feature-card" aria-label="Flashcards IA"><span class="feature-icon">🃏</span><h3>Flash Cards</h3><p>Apprends les concepts clés de l'IA de façon interactive</p></a>
+      <a href="/tips"      class="feature-card" aria-label="Astuces de prompting"><span class="feature-icon">💡</span><h3>Astuces</h3><p>Techniques avancées de prompting pour maîtriser les IAs</p></a>
+    </div>
+  </div>
+</section>
+
+<section class="featured-section">
+  <div class="section-container">
+    <h2 class="section-title">IAs en vedette</h2>
+    <div class="ai-grid">
+      <% featured.forEach(ai => { %>
+      <a href="/explore/<%= ai.slug %>" class="ai-card" aria-label="Voir <%= ai.name %>">
+        <div class="ai-card-header">
+          <div class="ai-logo" role="img" aria-label="Logo de <%= ai.name %>"><%= ai.name[0] %></div>
+          <div class="ai-meta">
+            <h3 class="ai-name"><%= ai.name %></h3>
+            <span class="ai-type"><%= (ai.type || '').replace(/_/g, ' ') %></span>
+          </div>
+          <span class="ai-pricing pricing-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+        </div>
+        <p class="ai-desc"><%= ai.short_description || (ai.description || '').slice(0, 100) + '...' %></p>
+        <div class="ai-tags">
+          <% (ai.tags || []).slice(0, 3).forEach(tag => { %><span class="tag">#<%= tag %></span><% }) %>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+    <div class="section-cta">
+      <a href="/explore" class="btn btn-outline">Voir toutes les IAs →</a>
+    </div>
+  </div>
+</section>
+
+<section class="recommend-section">
+  <div class="section-container">
+    <div class="recommend-card">
+      <h2>🎯 Trouve l'IA parfaite pour ton projet</h2>
+      <p>Décris ce que tu veux faire, on recommande les meilleurs outils automatiquement</p>
+      <form action="/recommend" method="POST" class="recommend-form">
+        <input type="text" name="description" class="form-input"
+          placeholder="Ex: Je veux créer des visuels pour mon site sans budget..." required minlength="5">
+        <button type="submit" class="btn btn-primary">Trouver mon IA →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCRIPT DU DÉFI (conditionnel) ===== -->
+<% if(typeof challenge !== 'undefined' && challenge && typeof user !== 'undefined' && user && !isDone) { %>
+  <script src="/js/challenge.js" defer></script>
+<% } %>

@@ -1,0 +1,22 @@
+const isAuth = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  req.flash('error', 'Connecte-toi pour acceder a cette page');
+  res.redirect('/auth/login');
+};
+
+const isAdmin = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.role === 'admin') return next();
+  if (!req.isAuthenticated()) {
+    req.flash('error', 'Connexion requise');
+    return res.redirect('/auth/login');
+  }
+  req.flash('error', 'Acces refuse - reservee aux admins');
+  res.redirect('/');
+};
+
+const isGuest = (req, res, next) => {
+  if (req.isAuthenticated()) return res.redirect('/');
+  next();
+};
+
+module.exports = { isAuth, isAdmin, isGuest };

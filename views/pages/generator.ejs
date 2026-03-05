@@ -1,0 +1,107 @@
+<!-- ============================================================
+     views/pages/generator.ejs  —  Générateur de prompts IA
+     ============================================================ -->
+
+<!-- Styles spécifiques (déjà dans main.ejs) 
+    
+-->
+
+<div class="page-header">
+  <h1>Générateur de Prompts <span class="accent">IA</span></h1>
+  <p>Décris ton intention, l'IA génère le prompt parfait</p>
+  
+  <% if (!user) { %>
+    <div class="limit-banner">
+      <span>🎁 Visiteur : 3 prompts gratuits par jour</span>
+      <a href="/auth/register" class="btn btn-sm btn-primary">Créer un compte gratuit</a>
+    </div>
+  <% } %>
+</div>
+
+<div class="generator-container">
+  
+  <!-- Zone principale -->
+  <div class="generator-main">
+    <div class="generator-card">
+      <label class="gen-label">Ton intention</label>
+      <textarea 
+        id="intentionInput" 
+        class="gen-textarea"
+        placeholder="Ex: Je veux un texte marketing pour une application de méditation qui cible des professionnels stressés entre 30 et 45 ans..."
+        rows="5"
+      ></textarea>
+
+      <div class="gen-options">
+        <div class="gen-option">
+          <label class="form-group">
+            <span style="font-size:0.85rem;color:var(--t2);font-weight:600">IA cible (optionnel)</span>
+            <input type="text" id="targetAI" class="form-input" placeholder="Ex: ChatGPT, Midjourney, Claude...">
+          </label>
+        </div>
+        
+        <% if (user) { %>
+        <div class="gen-option">
+          <label class="check-label">
+            <input type="checkbox" id="isPublic">
+            Rendre ce prompt public
+          </label>
+        </div>
+        <% } %>
+      </div>
+
+      <button id="generateBtn" class="btn btn-primary btn-lg btn-generate">
+        <span class="btn-text">⚡ Générer le prompt</span>
+        <span class="btn-loading">⏳ Génération en cours...</span>
+      </button>
+    </div>
+
+    <!-- Résultat -->
+    <div class="result-card" id="resultCard" style="display:none">
+      <div class="result-header">
+        <h3>✅ Prompt généré</h3>
+        <div class="result-actions">
+          <button onclick="copyPrompt()" class="btn btn-sm btn-ghost" id="copyBtn">
+            <i class="lucide-copy"></i> Copier
+          </button>
+          <div class="rating-btns" id="ratingBtns"></div>
+        </div>
+      </div>
+      <div class="result-prompt" id="resultPrompt"></div>
+      <div class="result-meta" id="resultMeta"></div>
+    </div>
+
+    <!-- Erreur -->
+    <div class="error-card" id="errorCard" style="display:none">
+      <span class="error-icon">⚠️</span>
+      <span id="errorMsg"></span>
+      <a href="/auth/register" class="btn btn-sm btn-primary" id="errorRegisterBtn" style="display:none">
+        Créer un compte →
+      </a>
+    </div>
+  </div>
+
+  <!-- Historique (connecté) -->
+  <% if (user && history && history.length > 0) { %>
+  <aside class="history-panel">
+    <h3>Historique récent</h3>
+    <% history.forEach(p => { %>
+    <div class="history-item">
+      <p class="history-intention" title="<%= p.intention %>">
+        <%= p.intention.slice(0, 60) %><%= p.intention.length > 60 ? '...' : '' %>
+      </p>
+      <button 
+        onclick="loadPrompt(this)" 
+        data-prompt="<%= encodeURIComponent(p.generated_prompt) %>" 
+        class="btn btn-xs btn-ghost"
+        title="Recharger ce prompt">
+        ↻
+      </button>
+    </div>
+    <% }) %>
+    <a href="/generator/history" class="btn btn-ghost btn-full" style="margin-top:0.5rem">
+      Voir tout l'historique →
+    </a>
+  </aside>
+  <% } %>
+</div>
+

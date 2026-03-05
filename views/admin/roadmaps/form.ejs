@@ -1,0 +1,24 @@
+<div class="tb2"><div class="tb2-l"><a href="/admin/roadmaps" class="btn btn-o btn-sm">← Retour</a></div></div>
+<div class="pn"><div class="pb">
+<form action="<%= action %>" method="<%= method %>" class="form">
+  <div class="fg">
+    <div class="fgrp"><label>Titre *</label><input type="text" name="title" value="<%= roadmap?roadmap.title:'' %>" class="fi" required></div>
+    <div class="fgrp"><label>Niveau</label>
+      <select name="level" class="fs">
+        <% ['beginner','intermediate','advanced'].forEach(l=>{%><option value="<%= l %>" <%=roadmap&&roadmap.level===l?'selected':''%>><%= l %></option><%})%>
+      </select>
+    </div>
+    <div class="fgrp"><label>Durée estimée</label><input type="text" name="estimated_duration" value="<%= roadmap?(roadmap.estimated_duration||''):'' %>" class="fi" placeholder="Ex: 2 semaines"></div>
+    <div class="fgrp"><label>Audience cible</label><input type="text" name="target_audience" value="<%= roadmap?(roadmap.target_audience||''):'' %>" class="fi" placeholder="Débutants en IA..."></div>
+  </div>
+  <div class="fgrp"><label>Description *</label><textarea name="description" class="ft" rows="3" required><%= roadmap?roadmap.description:'' %></textarea></div>
+  <div class="fgrp"><label>Étapes (1 titre par ligne)</label>
+    <textarea name="steps" class="ft" rows="8" placeholder="Introduction à l'IA&#10;Comprendre les LLMs&#10;Premiers prompts&#10;Outils avancés"><%= roadmap&&Array.isArray(roadmap.steps)?roadmap.steps.map(s=>s.title).join('\n'):'' %></textarea>
+    <small style="color:#50507a;font-size:.7rem">Chaque ligne = une étape. Tu pourras ajouter les détails plus tard.</small>
+  </div>
+  <div class="fa">
+    <a href="/admin/roadmaps" class="btn btn-o">Annuler</a>
+    <button type="submit" class="btn btn-p"><%= roadmap?'💾 Mettre à jour':'+ Créer la roadmap' %></button>
+  </div>
+</form>
+</div></div>

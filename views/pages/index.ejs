@@ -1,0 +1,237 @@
+<%# ============================================================
+    views/pages/index.ejs — Homepage modernisée
+    ============================================================ %>
+
+<div class="hp">
+
+<%# ════════════════════════════════════════════════════════════
+    HERO
+════════════════════════════════════════════════════════════ %>
+<section class="hp-hero">
+  <div class="hp-hero-wrap">
+
+    <%# — Gauche — %>
+    <div>
+      <div class="hp-pill">
+        <span class="hp-pill-dot"></span>
+        Plateforme d'apprentissage IA
+      </div>
+
+      <h1 class="hp-h1">
+        Deviens<br>
+        <span class="hp-h1-serif">expert</span><br>
+        en IA
+      </h1>
+
+      <p class="hp-desc">
+        Explore les outils, génère des prompts optimisés,
+        suis ta roadmap et maîtrise les concepts clés —
+        du premier pas à la maîtrise totale.
+      </p>
+
+      <div class="hp-ctas">
+        <a href="/explore"   class="hp-cta-a pri">🔍 Explorer les IAs</a>
+        <a href="/generator" class="hp-cta-a sec">⚡ Générateur de Prompts</a>
+      </div>
+
+      <div class="hp-stats">
+        <div>
+          <div class="hp-stat-n"><%= featured.length %>+</div>
+          <div class="hp-stat-l">IAs listées</div>
+        </div>
+        <div>
+          <div class="hp-stat-n">6</div>
+          <div class="hp-stat-l">outils inclus</div>
+        </div>
+        <div>
+          <div class="hp-stat-n">100%</div>
+          <div class="hp-stat-l">accès gratuit</div>
+        </div>
+      </div>
+    </div>
+
+    <%# — Droite : stage flottant — %>
+    <div class="hp-stage">
+      <div class="hp-orb hp-orb-v"></div>
+      <div class="hp-orb hp-orb-c"></div>
+
+      <%# Card principale %>
+      <div class="hp-card hp-card-main">
+        <div class="hc-head">
+          <div class="hc-ico" style="background:linear-gradient(135deg,#7c5cfc,#a78bfa)">G</div>
+          <div>
+            <div class="hc-name">GPT-4o</div>
+            <div class="hc-type">text_generation</div>
+          </div>
+          <span class="hc-badge" style="background:rgba(0,212,255,.1);color:#00d4ff">freemium</span>
+        </div>
+        <div class="hc-body">Modèle multimodal OpenAI — texte, image, fichiers. Le standard de référence.</div>
+        <div class="hc-tags">
+          <span class="hc-tag">#rédaction</span>
+          <span class="hc-tag">#code</span>
+          <span class="hc-tag">#analyse</span>
+        </div>
+        <div class="hc-bar">
+          <div class="hc-bar-f" style="width:94%;background:linear-gradient(90deg,#7c5cfc,#00d4ff)"></div>
+        </div>
+      </div>
+
+      <%# Card secondaire %>
+      <div class="hp-card hp-card-side">
+        <div class="hc-head">
+          <div class="hc-ico" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">M</div>
+          <div>
+            <div class="hc-name">Midjourney</div>
+            <div class="hc-type">image_generation</div>
+          </div>
+        </div>
+        <div class="hc-body" style="font-size:.74rem">Images artistiques haute qualité depuis un prompt.</div>
+        <div class="hc-tags" style="margin-top:.5rem">
+          <span class="hc-badge" style="background:rgba(245,158,11,.1);color:#f59e0b;padding:.1rem .4rem;border-radius:4px;font-family:var(--MF);font-size:.6rem">paid</span>
+        </div>
+      </div>
+
+      <%# Card mini — prompt %>
+      <div class="hp-card hp-card-mini">
+        <div style="font-family:var(--MF);font-size:.58rem;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.45rem">⚡ Prompt généré</div>
+        <div style="font-family:var(--MF);font-size:.67rem;color:var(--t2);line-height:1.55;background:var(--bg3);padding:.5rem .6rem;border-radius:6px">"Agis comme un expert en marketing..."</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%# ════════════════════════════════════════════════════════════
+    TRENDING STRIP
+════════════════════════════════════════════════════════════ %>
+<% if(typeof trending !== 'undefined' && trending && trending.length){ %>
+<div class="hp-strip">
+  <div class="hp-strip-in">
+    <span class="hp-strip-lbl">🔥 Trending</span>
+    <div class="hp-strip-list">
+      <% trending.forEach((ai, i) => { %>
+      <a href="/explore/<%= ai.slug %>" class="hp-strip-item">
+        <span class="hp-strip-num">#<%= i+1 %></span>
+        <%= ai.name %>
+      </a>
+      <% }) %>
+      <a href="/nouveautes" class="hp-strip-item" style="border-style:dashed;opacity:.65">Tout voir →</a>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<%# ════════════════════════════════════════════════════════════
+    DÉFI DU JOUR
+════════════════════════════════════════════════════════════ %>
+<% if(typeof challenge !== 'undefined' && challenge){ %>
+<div class="hp-defi">
+  <div class="hp-defi-in">
+    <div>
+      <div class="hp-defi-tag">
+        <span class="hp-defi-dot"></span> Défi du jour
+      </div>
+      <div class="hp-defi-q"><%= challenge.challenge_text %></div>
+      <div class="hp-defi-sub">Relève le défi pour augmenter ton streak 🔥</div>
+    </div>
+    <div>
+      <% if(typeof isDone !== 'undefined' && isDone){ %>
+        <div class="hp-done">✓ Complété aujourd'hui !</div>
+      <% } else if(typeof user !== 'undefined' && user){ %>
+        <button onclick="completeDailyChallenge()" class="hp-cta-a pri" id="challengeBtn">Relever le défi</button>
+        <div id="challengeMessage" style="margin-top:.6rem;font-size:.78rem;text-align:center;color:var(--gr)"></div>
+      <% } else { %>
+        <a href="/auth/login" class="hp-cta-a pri">Connexion →</a>
+      <% } %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<%# ════════════════════════════════════════════════════════════
+    FEATURES
+════════════════════════════════════════════════════════════ %>
+<div class="hp-feats-section">
+  <div class="hp-sec-eyebrow">Ce que tu peux faire</div>
+  <h2 class="hp-sec-h2">
+    Tous les outils pour<br>
+    <i>maîtriser</i> l'IA
+  </h2>
+  <div class="hp-feat-grid">
+    <a href="/explore"    class="hp-feat-card"><span class="hp-feat-ico">🔍</span><div class="hp-feat-name">Explorer les IAs</div><p class="hp-feat-desc">Catalogue complet, filtres par type, prix et difficulté.</p><span class="hp-feat-arr">Explorer →</span></a>
+    <a href="/generator"  class="hp-feat-card"><span class="hp-feat-ico">⚡</span><div class="hp-feat-name">Générer des Prompts</div><p class="hp-feat-desc">Intention → prompt structuré et optimisé en secondes.</p><span class="hp-feat-arr">Générer →</span></a>
+    <a href="/advisor"    class="hp-feat-card"><span class="hp-feat-ico">🎯</span><div class="hp-feat-name">IA Advisor</div><p class="hp-feat-desc">Quiz 4 questions → les IAs exactes pour ton profil.</p><span class="hp-feat-arr">Démarrer →</span></a>
+    <a href="/roadmap"    class="hp-feat-card"><span class="hp-feat-ico">🗺️</span><div class="hp-feat-name">Roadmap IA</div><p class="hp-feat-desc">Parcours structurés avec suivi de progression cochable.</p><span class="hp-feat-arr">Suivre →</span></a>
+    <a href="/flashcards" class="hp-feat-card"><span class="hp-feat-ico">🃏</span><div class="hp-feat-name">Flash Cards</div><p class="hp-feat-desc">Mémorise les concepts clés par retournement interactif.</p><span class="hp-feat-arr">Apprendre →</span></a>
+    <a href="/compare"    class="hp-feat-card"><span class="hp-feat-ico">⚖️</span><div class="hp-feat-name">Comparer</div><p class="hp-feat-desc">2 ou 3 IAs côte à côte sur tous les critères.</p><span class="hp-feat-arr">Comparer →</span></a>
+  </div>
+</div>
+
+<%# ════════════════════════════════════════════════════════════
+    IAs EN VEDETTE
+════════════════════════════════════════════════════════════ %>
+<% if(featured && featured.length){ %>
+<div class="hp-vedette">
+  <div class="hp-vedette-in">
+    <div class="hp-vedette-hd">
+      <div>
+        <div class="hp-sec-eyebrow">Sélection</div>
+        <h2 class="hp-sec-h2" style="margin-bottom:0">IAs <i>en vedette</i></h2>
+      </div>
+      <a href="/explore" class="hp-see-all">Voir toutes les IAs →</a>
+    </div>
+    <div class="hp-ai-grid">
+      <% featured.forEach(ai => { %>
+      <a href="/explore/<%= ai.slug %>" class="hp-ai-card">
+        <div class="hp-ai-hd">
+          <div class="hp-ai-ico" style="background:linear-gradient(135deg,var(--ac),var(--ac2))"><%= ai.name[0] %></div>
+          <div>
+            <div class="hp-ai-name"><%= ai.name %></div>
+            <div class="hp-ai-type"><%= (ai.type||'').replace(/_/g,' ') %></div>
+          </div>
+          <span class="hp-ai-pr hp-pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+        </div>
+        <p class="hp-ai-desc"><%= ai.short_description || (ai.description||'').slice(0,110) %>...</p>
+        <div class="hp-ai-tags">
+          <% (ai.tags||[]).slice(0,3).forEach(tag=>{ %><span class="hp-ai-tag">#<%= tag %></span><% }) %>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<%# ════════════════════════════════════════════════════════════
+    CTA FINAL
+════════════════════════════════════════════════════════════ %>
+<div class="hp-cta">
+  <div class="hp-cta-in">
+    <div class="hp-sec-eyebrow" style="justify-content:center">Recommandation</div>
+    <h2 class="hp-cta-h2">
+      Trouve l'IA <i>parfaite</i><br>pour ton projet
+    </h2>
+    <p class="hp-cta-p">
+      Une phrase suffit — décris ton besoin et on identifie<br>les meilleurs outils pour toi, instantanément.
+    </p>
+    <form action="/recommend" method="POST" class="hp-form">
+      <input
+        type="text"
+        name="description"
+        class="hp-input"
+        placeholder="Ex: créer des visuels pour mes réseaux sans budget..."
+        required minlength="5"
+      >
+      <button type="submit" class="hp-cta-a pri">Trouver →</button>
+    </form>
+    <div class="hp-form-sub">
+      ou <a href="/advisor">passer le quiz complet</a> pour une recommandation personnalisée
+    </div>
+  </div>
+</div>
+
+</div><%# .hp %>
+
+<% if(typeof challenge !== 'undefined' && challenge && typeof user !== 'undefined' && user && !isDone){ %>
+<script src="/js/challenge.js" defer></script>
+<% } %>

@@ -1,0 +1,29 @@
+<div class="g2">
+  <div class="pn">
+    <div class="ph"><h3>+ Ajouter</h3></div>
+    <div class="pb">
+      <form action="/admin/content/tips" method="POST" class="form">
+        <div class="fgrp"><label>Titre *</label><input type="text" name="title" class="fi" required></div>
+        <div class="fgrp"><label>Contenu *</label><textarea name="content" class="ft" rows="5" required></textarea></div>
+        <div class="fg-g">
+          <div class="fgrp"><label>Catégorie</label><input type="text" name="category" class="fi" value="prompting"></div>
+          <div class="fgrp"><label>Niveau</label><select name="difficulty" class="fs"><option value="beginner">Débutant</option><option value="intermediate">Intermédiaire</option><option value="advanced">Avancé</option></select></div>
+          <div class="fgrp"><label>Ordre</label><input type="number" name="order_index" class="fi" value="0"></div>
+        </div>
+        <button type="submit" class="btn btn-p btn-fw">Ajouter</button>
+      </form>
+    </div>
+  </div>
+  <div class="pn">
+    <div class="ph"><h3><%= (tips||[]).length %> Astuces</h3></div>
+    <table class="tbl">
+      <thead><tr><th>Titre</th><th>Cat.</th><th>Niveau</th><th></th></tr></thead>
+      <tbody>
+        <% (tips||[]).forEach(t=>{ %>
+        <tr><td><div style="font-weight:500"><%= t.title %></div><div class="tx-xs tx-m"><%= (t.content||'').slice(0,50) %>...</div></td><td><span class="tag"><%= t.category %></span></td><td><span class="bx <%= t.difficulty==='beginner'?'bx-g':t.difficulty==='intermediate'?'bx-y':'bx-r' %>"><%= t.difficulty %></span></td><td class="ac-cell"><a href="/admin/content/tips/<%= t.id %>/edit" class="btn btn-xs btn-o">✏</a><form action="/admin/content/tips/<%= t.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ?')"><button class="btn btn-xs btn-r">✕</button></form></td></tr>
+        <% }) %>
+        <% if(!tips||!tips.length){ %><tr><td colspan="4" style="text-align:center;color:var(--mu);padding:1.25rem">Aucune astuce</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

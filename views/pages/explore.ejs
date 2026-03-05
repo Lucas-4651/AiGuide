@@ -1,0 +1,167 @@
+<div class="ph"><h1>Explorer les IAs</h1><p>Découvre et filtre tous les outils IA disponibles</p></div>
+<div class="expl-wrap">
+  <aside class="filters">
+    <h3>Filtres</h3>
+    <form action="/explore" method="GET" id="filterForm">
+      <div class="f-grp"><label>Recherche</label><input type="text" name="search" value="<%= filters.search||'' %>" placeholder="Nom, usage..." class="fi"></div>
+      <div class="f-grp"><label>Type</label>
+        <select name="type" class="fs">
+          <option value="">Tous</option>
+          <% types.forEach(t=>{ %><option value="<%= t %>" <%= filters.type===t?'selected':'' %>><%= t.replace(/_/g,' ') %></option><% }) %>
+        </select>
+      </div>
+      <div class="f-grp"><label>Prix</label>
+        <select name="pricing" class="fs">
+          <option value="">Tous</option>
+          <option value="free" <%= filters.pricing==='free'?'selected':'' %>>Gratuit</option>
+          <option value="freemium" <%= filters.pricing==='freemium'?'selected':'' %>>Freemium</option>
+          <option value="paid" <%= filters.pricing==='paid'?'selected':'' %>>Payant</option>
+          <option value="open_source" <%= filters.pricing==='open_source'?'selected':'' %>>Open Source</option>
+        </select>
+      </div>
+      <div class="f-grp"><label>Niveau</label>
+        <select name="difficulty" class="fs">
+          <option value="">Tous</option>
+          <option value="beginner" <%= filters.difficulty==='beginner'?'selected':'' %>>Débutant</option>
+          <option value="intermediate" <%= filters.difficulty==='intermediate'?'selected':'' %>>Intermédiaire</option>
+          <option value="advanced" <%= filters.difficulty==='advanced'?'selected':'' %>>Avancé</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-p btn-fw">Filtrer</button>
+      <a href="/explore" class="btn btn-gh btn-fw" style="margin-top:.35rem">Reset</a>
+    </form>
+  </aside>
+
+  <div class="res-panel">
+    <div class="res-hd">
+      <span><%= ais.length %> IA<%= ais.length>1?'s':'' %></span>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <!-- MODE SWITCHER -->
+        <div style="display:flex;gap:.25rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:.2rem">
+          <button id="btnGrid" onclick="setView('grid')" class="btn btn-xs" style="background:var(--ac);color:#fff">⊞ Grille</button>
+          <button id="btnTable" onclick="setView('table')" class="btn btn-xs btn-gh">☰ Tableau</button>
+        </div>
+        <!-- TRI -->
+        <select id="sortSel" onchange="sortAIs(this.value)" class="fs" style="width:auto;padding:.28rem .65rem;font-size:.76rem">
+          <option value="">Trier par...</option>
+          <option value="name">Nom A-Z</option>
+          <option value="views">Popularité</option>
+          <option value="price">Prix</option>
+        </select>
+        <!-- COMPARE -->
+        <div id="cmpBar" style="display:none" class="cmp-bar">
+          <span id="cmpCount" style="font-size:.78rem">0</span>
+          <a href="#" id="cmpBtn" class="btn btn-xs btn-p">Comparer</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRILLE -->
+    <div id="viewGrid" class="ai-grid" style="<% if(!ais.length){ %>display:none<% } %>">
+      <% ais.forEach(ai=>{ %>
+      <div class="ai-card" data-id="<%= ai.id %>" data-name="<%= ai.name.toLowerCase() %>" data-views="<%= ai.view_count||0 %>" data-price="<%= ai.pricing_type %>">
+        <div class="ai-head">
+          <div class="ai-logo"><%= ai.name[0] %></div>
+          <div class="ai-meta">
+            <div class="ai-name"><a href="/explore/<%= ai.slug %>"><%= ai.name %></a></div>
+            <span class="ai-type"><%= ai.type.replace(/_/g,' ') %></span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.25rem">
+            <span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+            <input type="checkbox" class="cmp-ck" value="<%= ai.id %>" style="accent-color:var(--ac);width:14px;height:14px" title="Comparer">
+          </div>
+        </div>
+        <p class="ai-desc"><%= ai.short_description||(ai.description||'').slice(0,110) %></p>
+        <div class="ai-tags"><% (ai.tags||[]).slice(0,4).forEach(tag=>{ %><span class="tag">#<%= tag %></span><% }) %></div>
+        <div class="ai-foot">
+          <span class="dif-<%= ai.difficulty_level %>"><%= ai.difficulty_level %></span>
+          <a href="/explore/<%= ai.slug %>" class="btn btn-sm btn-gh">Détails →</a>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- TABLEAU -->
+    <div id="viewTable" style="display:none">
+      <div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r)">
+        <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+          <thead>
+            <tr>
+              <th onclick="sortAIs('name')" style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap">Nom ↕</th>
+              <th style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase">Type</th>
+              <th onclick="sortAIs('price')" style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase;cursor:pointer">Prix ↕</th>
+              <th style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase">Niveau</th>
+              <th onclick="sortAIs('views')" style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase;cursor:pointer">Vues ↕</th>
+              <th style="text-align:left;padding:.6rem .875rem;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <% ais.forEach(ai=>{ %>
+            <tr class="tbl-row" data-name="<%= ai.name.toLowerCase() %>" data-views="<%= ai.view_count||0 %>" data-price="<%= ai.pricing_type %>" style="border-bottom:1px solid var(--bd)">
+              <td style="padding:.62rem .875rem;font-weight:600"><a href="/explore/<%= ai.slug %>" style="color:var(--t)"><%= ai.name %></a><% if(ai.is_featured){ %> <span class="badge badge-gold" style="font-size:.6rem">★</span><% } %></td>
+              <td style="padding:.62rem .875rem"><span class="tag"><%= ai.type.replace(/_/g,' ') %></span></td>
+              <td style="padding:.62rem .875rem"><span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span></td>
+              <td style="padding:.62rem .875rem"><span class="dif-<%= ai.difficulty_level %>"><%= ai.difficulty_level %></span></td>
+              <td style="padding:.62rem .875rem;color:var(--mu);font-size:.78rem"><%= ai.view_count||0 %></td>
+              <td style="padding:.62rem .875rem"><a href="/explore/<%= ai.slug %>" class="btn btn-xs btn-gh">→</a></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% if(!ais.length){ %>
+    <div class="empty"><span class="empty-ico">🔍</span><p>Aucune IA trouvée avec ces filtres.</p><a href="/explore" class="btn btn-gh">Voir toutes</a></div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+// Compare
+const cks = document.querySelectorAll('.cmp-ck');
+const cmpBar = document.getElementById('cmpBar');
+const cmpCount = document.getElementById('cmpCount');
+const cmpBtn = document.getElementById('cmpBtn');
+cks.forEach(c => c.addEventListener('change', () => {
+  const sel = [...cks].filter(x=>x.checked).map(x=>x.value);
+  cmpBar.style.display = sel.length >= 2 ? 'flex' : 'none';
+  cmpCount.textContent = sel.length + ' sélectionnée(s)';
+  cmpBtn.href = '/compare?ids=' + sel.join(',');
+}));
+
+// View switch
+function setView(v) {
+  document.getElementById('viewGrid').style.display  = v==='grid'  ? '' : 'none';
+  document.getElementById('viewTable').style.display = v==='table' ? '' : 'none';
+  document.getElementById('btnGrid').style.background  = v==='grid'  ? 'var(--ac)' : '';
+  document.getElementById('btnGrid').style.color       = v==='grid'  ? '#fff' : '';
+  document.getElementById('btnTable').style.background = v==='table' ? 'var(--ac)' : '';
+  document.getElementById('btnTable').style.color      = v==='table' ? '#fff' : '';
+  localStorage.setItem('exploreView', v);
+}
+// Restore view
+const sv = localStorage.getItem('exploreView');
+if (sv) setView(sv);
+
+// Sort
+const ORDER = { free:0, freemium:1, paid:2, open_source:3 };
+function sortAIs(by) {
+  const grid = document.getElementById('viewGrid');
+  const tbody = document.getElementById('tableBody');
+  const cards = [...grid.querySelectorAll('.ai-card')].sort((a,b) => {
+    if (by==='name')  return a.dataset.name.localeCompare(b.dataset.name);
+    if (by==='views') return Number(b.dataset.views)-Number(a.dataset.views);
+    if (by==='price') return (ORDER[a.dataset.price]||0)-(ORDER[b.dataset.price]||0);
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
+  const rows = [...tbody.querySelectorAll('.tbl-row')].sort((a,b) => {
+    if (by==='name')  return a.dataset.name.localeCompare(b.dataset.name);
+    if (by==='views') return Number(b.dataset.views)-Number(a.dataset.views);
+    if (by==='price') return (ORDER[a.dataset.price]||0)-(ORDER[b.dataset.price]||0);
+    return 0;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>

@@ -1,0 +1,96 @@
+<!-- ============================================================
+     views/partials/footer.ejs
+     Footer moderne et responsive
+     ============================================================ -->
+
+<footer class="footer">
+  <div class="foot-in">
+    
+    <!-- Brand Section -->
+    <div class="foot-brand">
+      <a href="/" class="nav-brand">
+        <span class="brand-dot">◈</span>
+        <span>AI<span class="brand-acc">Guide</span></span>
+      </a>
+      
+      <p>Du débutant à l'expert en IA — Tous les outils pour maîtriser l'intelligence artificielle.</p>
+      
+      <!-- Social Links (optionnel) -->
+      <div class="foot-social">
+        <a href="#" class="social-link" aria-label="Twitter">
+          <i class="lucide-twitter"></i>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <i class="lucide-github"></i>
+        </a>
+        <a href="#" class="social-link" aria-label="Discord">
+          <i class="lucide-message-square"></i>
+        </a>
+      </div>
+      
+      <!-- Newsletter (optionnel) -->
+      <!--
+      <form class="foot-newsletter">
+        <input type="email" class="newsletter-input" placeholder="Votre email" required>
+        <button type="submit" class="newsletter-btn">→</button>
+      </form>
+      -->
+    </div>
+    
+    <!-- Links Section -->
+    <div class="foot-links">
+      
+      <div class="foot-col">
+        <h4>Explorer</h4>
+        <a href="/explore">Toutes les IAs</a>
+        <a href="/compare">Comparateur</a>
+        <a href="/roadmap">Roadmap</a>
+        <a href="/advisor">IA Advisor <span class="new-badge">New</span></a>
+      </div>
+      
+      <div class="foot-col">
+        <h4>Apprendre</h4>
+        <a href="/flashcards">Flash Cards</a>
+        <a href="/tips">Astuces</a>
+        <a href="/generator">Générateur</a>
+        <a href="/nouveautes">Nouveautés</a>
+      </div>
+      
+      <div class="foot-col">
+        <h4>Compte</h4>
+        <% if(user){ %>
+          <a href="/profile">
+            <i class="lucide-user" style="font-size:0.8rem;"></i> Mon Profil
+          </a>
+          <a href="/favorites">
+            <i class="lucide-heart" style="font-size:0.8rem;"></i> Mes Favoris
+          </a>
+          <a href="/generator/history">
+            <i class="lucide-history" style="font-size:0.8rem;"></i> Mes prompts
+          </a>
+          <% if(isAdmin){ %>
+            <a href="/admin">
+              <i class="lucide-settings" style="font-size:0.8rem;"></i> Administration
+            </a>
+          <% } %>
+        <% } else { %>
+          <a href="/auth/login">
+            <i class="lucide-log-in" style="font-size:0.8rem;"></i> Connexion
+          </a>
+          <a href="/auth/register">
+            <i class="lucide-user-plus" style="font-size:0.8rem;"></i> Inscription
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom Bar -->
+  <div class="foot-bt">
+    <span>© <%= new Date().getFullYear() %> AI Guide</span>
+    <span class="separator">•</span>
+    <span>Built by <span class="heart">❤️</span> Lucas46 Tech Studio</span>
+    <span class="separator">•</span>
+    <span>v2.0.0</span>
+  </div>
+</footer>

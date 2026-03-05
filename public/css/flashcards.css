@@ -1,0 +1,286 @@
+/* ============================================================
+   flashcards.css - Styles pour les Flash Cards interactives
+   ============================================================ */
+
+/* Container principal */
+.flashcards-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ===== CATEGORY TABS ===== */
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: 100px;
+  width: fit-content;
+}
+
+.tab-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--t2);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--t);
+  background: var(--bg3);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  color: white;
+}
+
+/* ===== STATS BAR ===== */
+.cards-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  font-size: 0.85rem;
+  color: var(--t2);
+}
+
+.cards-stats span:first-child {
+  font-weight: 600;
+  color: var(--t);
+  padding-right: 1rem;
+  border-right: 1px solid var(--bd);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg3);
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 200px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ===== FLASHCARDS GRID ===== */
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+/* ===== FLASHCARD STYLES ===== */
+.flashcard {
+  aspect-ratio: 3/4;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  overflow-y: auto;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.flashcard-front {
+  background: linear-gradient(145deg, var(--bg2), var(--bg3));
+}
+
+.flashcard-back {
+  background: linear-gradient(145deg, var(--bg2), rgba(124, 92, 252, 0.1));
+  transform: rotateY(180deg);
+  border-color: var(--ac);
+  box-shadow: 0 10px 20px rgba(124, 92, 252, 0.2);
+}
+
+.flashcard:hover .flashcard-front {
+  border-color: var(--ac);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Contenu de la carte */
+.card-category {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(124, 92, 252, 0.1);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ac);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  align-self: flex-start;
+}
+
+.card-term {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--t);
+  line-height: 1.3;
+}
+
+.card-definition {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--t2);
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.card-hint {
+  font-size: 0.75rem;
+  color: var(--mu);
+  margin-top: auto;
+  opacity: 0.7;
+}
+
+/* Exemple */
+.card-example {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--bg3);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.example-label {
+  display: block;
+  font-weight: 600;
+  color: var(--ac);
+  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-example p {
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+/* Niveaux de difficulté */
+.diff-1 {
+  color: var(--gr);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.diff-2 {
+  color: var(--ye);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.diff-3 {
+  color: var(--re);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  color: var(--t2);
+  margin-bottom: 1.5rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .category-tabs {
+    border-radius: var(--r);
+    padding: 0.5rem;
+  }
+  
+  .cards-stats {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .cards-stats span:first-child {
+    border-right: none;
+    padding-right: 0;
+  }
+  
+  .flashcards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .flashcard {
+    aspect-ratio: 3/4;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .card-term {
+    font-size: 1.2rem;
+  }
+}

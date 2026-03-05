@@ -1,0 +1,88 @@
+/* ============================================================
+   ai-detail.css - Styles pour la page de détail d'une IA
+   ============================================================ */
+
+/* Header de la page */
+.ai-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ai-detail-header .ai-logo {
+  width: 72px;
+  height: 72px;
+  font-size: 2rem;
+  border-radius: 16px;
+}
+
+.ai-detail-header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Grille principale */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+/* Grille des points forts/limites */
+.strengths-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Tags spécifiques */
+.tag.accent {
+  background: rgba(124, 92, 252, 0.1);
+  border-color: rgba(124, 92, 252, 0.3);
+  color: var(--ac);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .ai-detail-header .btn-primary {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  
+  .strengths-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .ai-detail-header .ai-logo {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.5rem !important;
+  }
+  
+  .ai-detail-header h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  .ai-detail-header {
+    gap: 1rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .ai-detail-header h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .ai-detail-header .ai-logo {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.2rem !important;
+  }
+}

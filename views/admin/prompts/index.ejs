@@ -1,0 +1,23 @@
+<div class="pn">
+  <table class="tbl">
+    <thead><tr><th>Intention</th><th>IA cible</th><th>User</th><th>Modèle</th><th>Note</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% (prompts||[]).forEach(p=>{%>
+      <tr>
+        <td class="tx-sm" style="max-width:260px"><%= (p.intention||'').slice(0,80) %>...</td>
+        <td><span class="tag"><%= p.target_ai||'—' %></span></td>
+        <td class="tx-sm tx-m"><%= p.user_id?'#'+p.user_id:'invité' %></td>
+        <td class="tx-xs tx-m" style="font-family:var(--mono)"><%= p.model_used||'—' %></td>
+        <td class="tx-sm"><%= p.rating?'★ '+p.rating+'/5':'—' %></td>
+        <td class="tx-xs tx-m"><%= new Date(p.created_at).toLocaleString('fr') %></td>
+        <td>
+          <form action="/admin/prompts/<%= p.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ce prompt ?')">
+            <button class="btn btn-xs btn-r">✕</button>
+          </form>
+        </td>
+      </tr>
+      <%})%>
+      <%if(!prompts||!prompts.length){%><tr><td colspan="7" style="text-align:center;color:#50507a;padding:2rem">Aucun prompt</td></tr><%}%>
+    </tbody>
+  </table>
+</div>

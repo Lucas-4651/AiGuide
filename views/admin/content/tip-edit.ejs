@@ -1,0 +1,22 @@
+<div class="tb2"><div class="tb2-l"><a href="/admin/content/tips" class="btn btn-o btn-sm">← Retour</a></div></div>
+<div class="pn" style="max-width:600px"><div class="pb">
+<form action="/admin/content/tips/<%= tip.id %>?_method=PUT" method="POST" class="form">
+  <div class="fgrp"><label>Titre *</label><input type="text" name="title" value="<%= tip.title %>" class="fi" required></div>
+  <div class="fgrp"><label>Contenu *</label><textarea name="content" class="ft" rows="6" required><%= tip.content %></textarea></div>
+  <div class="fg">
+    <div class="fgrp"><label>Catégorie</label><input type="text" name="category" value="<%= tip.category %>" class="fi"></div>
+    <div class="fgrp"><label>Niveau</label>
+      <select name="difficulty" class="fs">
+        <option value="beginner" <%=tip.difficulty==='beginner'?'selected':''%>>Débutant</option>
+        <option value="intermediate" <%=tip.difficulty==='intermediate'?'selected':''%>>Intermédiaire</option>
+        <option value="advanced" <%=tip.difficulty==='advanced'?'selected':''%>>Avancé</option>
+      </select>
+    </div>
+    <div class="fgrp"><label>Ordre</label><input type="number" name="order_index" value="<%= tip.order_index||0 %>" class="fi"></div>
+  </div>
+  <div class="fa">
+    <a href="/admin/content/tips" class="btn btn-o">Annuler</a>
+    <button type="submit" class="btn btn-p">💾 Sauvegarder</button>
+  </div>
+</form>
+</div></div>

@@ -1,0 +1,350 @@
+/* ============================================================
+   footer.css - Styles modernes pour le footer
+   ============================================================ */
+
+.footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--bd);
+  margin-top: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Effet de gradient subtil en arrière-plan */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ac), var(--ac2), var(--ac), transparent);
+}
+
+.footer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.2), transparent);
+}
+
+.foot-in {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: grid;
+  grid-template-columns: 1.5fr 2fr;
+  gap: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== BRAND SECTION ===== */
+.foot-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.foot-brand .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--t);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.foot-brand .nav-brand:hover {
+  transform: translateY(-2px);
+}
+
+.brand-dot {
+  color: var(--ac);
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px var(--ac));
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.brand-acc {
+  color: var(--ac);
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.foot-brand p {
+  color: var(--t2);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 250px;
+}
+
+/* Social links (optionnel - à ajouter si tu veux) */
+.foot-social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t2);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-link:hover {
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  color: white;
+  transform: translateY(-3px);
+  border-color: transparent;
+}
+
+/* ===== LINKS SECTION ===== */
+.foot-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.foot-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.foot-col h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--t);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.foot-col h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.foot-col:hover h4::after {
+  width: 50px;
+}
+
+.foot-col a {
+  color: var(--t2);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+}
+
+.foot-col a:hover {
+  color: var(--ac);
+  transform: translateX(4px);
+}
+
+.foot-col a::before {
+  content: '→';
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s ease;
+  color: var(--ac);
+}
+
+.foot-col a:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+  margin-right: 0.25rem;
+}
+
+/* ===== BOTTOM BAR ===== */
+.foot-bt {
+  border-top: 1px solid var(--bd);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--t2);
+  background: var(--bg3);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.foot-bt span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.foot-bt .heart {
+  color: var(--re);
+  animation: heartbeat 1.5s ease infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Badge "nouveau" optionnel */
+.new-badge {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.4rem;
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  color: white;
+  border-radius: 100px;
+  margin-left: 0.25rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .foot-in {
+    padding: 2.5rem 1.5rem;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .foot-in {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+  
+  .foot-brand {
+    text-align: center;
+    align-items: center;
+  }
+  
+  .foot-brand p {
+    max-width: 100%;
+  }
+  
+  .foot-links {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  .foot-col h4::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .foot-col {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .foot-col a {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .foot-in {
+    padding: 2rem 1rem;
+  }
+  
+  .foot-links {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .foot-col {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .foot-col a {
+    justify-content: center;
+  }
+  
+  .foot-bt {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .foot-bt .separator {
+    display: none;
+  }
+}
+
+/* ===== NEWSLETTER (optionnel - à ajouter si tu veux) ===== */
+.foot-newsletter {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  max-width: 300px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  border-radius: var(--rs);
+  color: var(--t);
+  font-size: 0.8rem;
+}
+
+.newsletter-input:focus {
+  outline: none;
+  border-color: var(--ac);
+}
+
+.newsletter-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--ac), var(--ac2));
+  border: none;
+  border-radius: var(--rs);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.newsletter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
+}

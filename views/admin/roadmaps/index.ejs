@@ -1,0 +1,26 @@
+<div class="tb2">
+  <div class="tb2-l"><a href="/admin/roadmaps/new" class="btn btn-p">+ Ajouter Roadmap</a><span class="tx-m tx-sm"><%= roadmaps.length %> roadmaps</span></div>
+</div>
+<div class="pn">
+  <table class="tbl">
+    <thead><tr><th>Titre</th><th>Niveau</th><th>Durée</th><th>Étapes</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% (roadmaps||[]).forEach(r=>{%>
+      <tr class="<%= !r.is_active?'dim':'' %>">
+        <td><div style="font-weight:600"><%= r.title %></div><div class="tx-xs tx-m"><%= (r.description||'').slice(0,60) %>...</div></td>
+        <td><span class="bx <%= r.level==='beginner'?'bx-g':r.level==='intermediate'?'bx-y':'bx-r' %>"><%= r.level %></span></td>
+        <td class="tx-sm tx-m"><%= r.estimated_duration||'—' %></td>
+        <td class="tx-sm"><%= Array.isArray(r.steps)?r.steps.length:0 %> étapes</td>
+        <td><span class="<%= r.is_active?'on-dot':'off-dot' %>"><%= r.is_active?'● Actif':'● Inactif' %></span></td>
+        <td class="ac">
+          <a href="/admin/roadmaps/<%= r.id %>/edit" class="btn btn-xs btn-o">✏ Modifier</a>
+          <form action="/admin/roadmaps/<%= r.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ?')">
+            <button class="btn btn-xs btn-r">✕</button>
+          </form>
+        </td>
+      </tr>
+      <%})%>
+      <%if(!roadmaps||!roadmaps.length){%><tr><td colspan="6" style="text-align:center;color:#50507a;padding:2rem">Aucune roadmap</td></tr><%}%>
+    </tbody>
+  </table>
+</div>

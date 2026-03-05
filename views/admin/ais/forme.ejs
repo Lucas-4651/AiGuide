@@ -1,0 +1,104 @@
+<!-- ============================================================
+     views/admin/ais/form.ejs
+     ============================================================ -->
+<form action="<%= action %>" method="<%= method %>" class="admin-form">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" name="name" id="nameInput" value="<%= ai ? ai.name : '' %>" class="form-input" required>
+    </div>
+    <div class="form-group">
+      <label>Slug <small class="text-muted">(auto-genere si vide)</small></label>
+      <input type="text" name="slug" id="slugInput" value="<%= ai ? ai.slug : '' %>" class="form-input" placeholder="ex: chat-gpt">
+    </div>
+    <div class="form-group" style="grid-column:1/-1">
+      <label>Description courte <small class="text-muted">(1 ligne, affichee dans les cartes)</small></label>
+      <input type="text" name="short_description" value="<%= ai ? (ai.short_description||'') : '' %>" class="form-input" placeholder="Ex: Assistant conversationnel par OpenAI">
+    </div>
+    <div class="form-group">
+      <label>Type *</label>
+      <select name="type" class="form-select" required>
+        <option value="">-- Choisir --</option>
+        <% ['text_generation','image_generation','code','audio','video','multimodal','data_analysis','search','other'].forEach(t => { %>
+          <option value="<%= t %>" <%= ai && ai.type === t ? 'selected' : '' %>><%= t.replace(/_/g,' ') %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Fournisseur</label>
+      <input type="text" name="provider" value="<%= ai ? (ai.provider||'') : '' %>" class="form-input" placeholder="OpenAI, Google, Anthropic...">
+    </div>
+    <div class="form-group">
+      <label>URL du site</label>
+      <input type="url" name="website_url" value="<%= ai ? (ai.website_url||'') : '' %>" class="form-input" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Type de prix</label>
+      <select name="pricing_type" class="form-select">
+        <option value="free"        <%= ai && ai.pricing_type === 'free'        ? 'selected' : '' %>>Gratuit</option>
+        <option value="freemium"    <%= !ai || ai.pricing_type === 'freemium'   ? 'selected' : '' %>>Freemium</option>
+        <option value="paid"        <%= ai && ai.pricing_type === 'paid'        ? 'selected' : '' %>>Payant</option>
+        <option value="open_source" <%= ai && ai.pricing_type === 'open_source' ? 'selected' : '' %>>Open Source</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Detail prix</label>
+      <input type="text" name="price_info" value="<%= ai ? (ai.price_info||'') : '' %>" class="form-input" placeholder="Ex: Gratuit / 20$/mois Pro">
+    </div>
+    <div class="form-group">
+      <label>Niveau requis</label>
+      <select name="difficulty_level" class="form-select">
+        <option value="beginner"     <%= !ai || ai.difficulty_level === 'beginner'     ? 'selected' : '' %>>Debutant</option>
+        <option value="intermediate" <%= ai && ai.difficulty_level === 'intermediate' ? 'selected' : '' %>>Intermediaire</option>
+        <option value="advanced"     <%= ai && ai.difficulty_level === 'advanced'     ? 'selected' : '' %>>Avance</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>URL Logo <small class="text-muted">(optionnel)</small></label>
+      <input type="text" name="logo_url" value="<%= ai ? (ai.logo_url||'') : '' %>" class="form-input" placeholder="https://...">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Description complete *</label>
+    <textarea name="description" class="form-textarea" rows="5" required><%= ai ? ai.description : '' %></textarea>
+  </div>
+
+  <div class="form-grid-3">
+    <div class="form-group">
+      <label>Points forts <small class="text-muted">(1 par ligne)</small></label>
+      <textarea name="strengths" class="form-textarea" rows="5" placeholder="Polyvalent&#10;Excellent code&#10;Interface simple"><%= ai ? (ai.strengths||[]).join('\n') : '' %></textarea>
+    </div>
+    <div class="form-group">
+      <label>Limites <small class="text-muted">(1 par ligne)</small></label>
+      <textarea name="limitations" class="form-textarea" rows="5" placeholder="Hallucinations&#10;Limite de tokens"><%= ai ? (ai.limitations||[]).join('\n') : '' %></textarea>
+    </div>
+    <div class="form-group">
+      <label>Cas d'usage <small class="text-muted">(1 par ligne)</small></label>
+      <textarea name="use_cases" class="form-textarea" rows="5" placeholder="Redaction&#10;Code&#10;Analyse"><%= ai ? (ai.use_cases||[]).join('\n') : '' %></textarea>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Tags <small class="text-muted">(1 par ligne)</small></label>
+    <textarea name="tags" class="form-textarea" rows="2" placeholder="nlp&#10;chat&#10;code"><%= ai ? (ai.tags||[]).join('\n') : '' %></textarea>
+  </div>
+
+  <div class="form-checks">
+    <label class="check-label">
+      <input type="checkbox" name="is_featured" value="1" <%= ai && ai.is_featured ? 'checked' : '' %>>
+      ⭐ Mettre en vedette (affiche sur la homepage)
+    </label>
+    <label class="check-label">
+      <input type="checkbox" name="is_active" value="1" <%= !ai || ai.is_active ? 'checked' : '' %>>
+      ✓ Active (visible sur le site)
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <a href="/admin/ais" class="btn btn-ghost">Annuler</a>
+    <button type="submit" class="btn btn-primary"><%= ai ? 'Mettre a jour l IA' : '+ Ajouter l IA' %></button>
+  </div>
+</form>
+
+

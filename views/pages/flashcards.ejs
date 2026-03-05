@@ -1,0 +1,86 @@
+<!-- ============================================================
+     views/pages/flashcards.ejs  —  Flash Cards interactives
+     ============================================================ -->
+
+
+
+<div class="page-header">
+  <h1>Flash Cards IA</h1>
+  <p>Apprends les concepts clés de l'intelligence artificielle</p>
+</div>
+
+<div class="flashcards-container">
+  
+  <!-- Category Tabs -->
+  <div class="category-tabs">
+    <a href="/flashcards" class="tab-btn <%= !activeCategory ? 'active' : '' %>">
+      Toutes (<%= cards.length %>)
+    </a>
+    <% categories.forEach(cat => { %>
+      <a href="/flashcards?category=<%= cat %>" 
+         class="tab-btn <%= activeCategory === cat ? 'active' : '' %>">
+        <%= cat %>
+      </a>
+    <% }) %>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="cards-stats">
+    <span><%= cards.length %> cartes</span>
+    <span id="progressText">0 / <%= cards.length %> vues</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <button onclick="resetProgress()" class="btn btn-xs btn-ghost" title="Réinitialiser la progression">
+      ↻ Reset
+    </button>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="flashcards-grid" id="cardsGrid">
+    <% cards.forEach((card, i) => { %>
+    <div class="flashcard" data-index="<%= i %>" onclick="flipCard(this)">
+      <div class="flashcard-inner">
+        
+        <!-- Face avant -->
+        <div class="flashcard-front">
+          <span class="card-category"><%= card.category %></span>
+          <h3 class="card-term"><%= card.term %></h3>
+          <span class="diff-<%= card.difficulty %>">
+            <%= card.difficulty === 1 ? '⬢ Débutant' : 
+                card.difficulty === 2 ? '⬢⬢ Intermédiaire' : 
+                '⬢⬢⬢ Avancé' %>
+          </span>
+          <p class="card-hint">Clique pour voir la définition</p>
+        </div>
+        
+        <!-- Face arrière -->
+        <div class="flashcard-back">
+          <p class="card-definition"><%= card.definition %></p>
+          <% if (card.example) { %>
+          <div class="card-example">
+            <span class="example-label">Exemple :</span>
+            <p><%= card.example %></p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <!-- Empty State -->
+  <% if (cards.length === 0) { %>
+  <div class="empty-state">
+    <span class="empty-icon">🃏</span>
+    <p>Aucune flash card disponible pour le moment</p>
+    <% if (isAdmin) { %>
+      <a href="/admin/content/flashcards" class="btn btn-primary">
+        Ajouter des cartes
+      </a>
+    <% } %>
+  </div>
+  <% } %>
+  
+</div>
+

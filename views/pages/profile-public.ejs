@@ -1,0 +1,26 @@
+<div style="max-width:760px;margin:0 auto">
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:2rem;margin-bottom:1.25rem;text-align:center">
+    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;margin:0 auto 1rem">
+      <% if(u.avatar_url){ %><img src="<%= u.avatar_url %>" style="width:100%;height:100%;border-radius:50%;object-fit:cover"><% } else { %><%= u.username[0].toUpperCase() %><% } %>
+    </div>
+    <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:.25rem"><%= u.username %></h1>
+    <p class="text-muted text-sm"><%= u.bio || 'Aucune bio.' %></p>
+    <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:1.25rem">
+      <div><div style="font-size:1.5rem;font-weight:800;color:var(--ac)"><%= stats.prompts %></div><div class="text-muted text-sm">Prompts</div></div>
+      <div><div style="font-size:1.5rem;font-weight:800;color:var(--ac2)"><%= stats.favs %></div><div class="text-muted text-sm">Favoris</div></div>
+      <div><div style="font-size:1.5rem;font-weight:800;color:var(--ye)">🔥 <%= stats.streak %></div><div class="text-muted text-sm">Streak</div></div>
+    </div>
+  </div>
+  <% if(favs.length){ %>
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:1.25rem">
+    <div style="padding:.75rem 1rem;border-bottom:1px solid var(--bd)"><h3 style="font-size:.85rem;font-weight:600;color:var(--t2)">IAs favorites publiques</h3></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;padding:.875rem">
+      <% favs.forEach(ai=>{ %>
+      <a href="/explore/<%= ai.slug %>" style="display:block;padding:.75rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-size:.83rem;font-weight:600;transition:border-color .15s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'">
+        <%= ai.name %><div class="text-muted" style="font-size:.7rem;margin-top:.2rem"><%= ai.type %></div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+</div>

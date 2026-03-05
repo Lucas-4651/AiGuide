@@ -1,0 +1,31 @@
+<div class="ph"><h1>❤️ Mes Favoris</h1><p><%= favs.length %> IA<%= favs.length>1?'s':'' %> sauvegardée<%= favs.length>1?'s':'' %></p></div>
+<% if(favs.length){ %>
+<div class="ai-grid">
+  <% favs.forEach(ai=>{ %>
+  <div class="ai-card">
+    <div class="ai-head">
+      <div class="ai-logo"><%= ai.name[0] %></div>
+      <div class="ai-meta">
+        <div class="ai-name"><a href="/explore/<%= ai.slug %>"><%= ai.name %></a></div>
+        <span class="ai-type"><%= ai.type %></span>
+      </div>
+      <button onclick="toggleFav(<%= ai.id %>, this)" data-fav="1" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--re)" title="Retirer des favoris">❤️</button>
+    </div>
+    <p class="ai-desc"><%= ai.short_description || (ai.description||'').slice(0,100) %>...</p>
+    <div class="ai-foot">
+      <span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+      <a href="/explore/<%= ai.slug %>" class="btn btn-gh btn-xs">Voir →</a>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } else { %>
+<div class="empty"><span class="empty-ico">💔</span><p>Aucun favori pour l'instant.</p><a href="/explore" class="btn btn-p">Explorer les IAs</a></div>
+<% } %>
+<script>
+async function toggleFav(aiId, btn) {
+  const r = await fetch('/api/favorites/' + aiId, { method:'POST' });
+  const d = await r.json();
+  if (!d.added) btn.closest('.ai-card').remove();
+}
+</script>

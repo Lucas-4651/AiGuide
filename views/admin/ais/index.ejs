@@ -1,0 +1,26 @@
+<div class="tb2">
+  <div class="tb2-l"><a href="/admin/ais/new" class="btn btn-p">+ Ajouter IA</a><span class="tx-m tx-sm"><%= ais.length %> IAs</span></div>
+</div>
+<div class="pn">
+  <table class="tbl">
+    <thead><tr><th>Nom</th><th>Type</th><th>Fournisseur</th><th>Prix</th><th>Difficulté</th><th>Vues</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% ais.forEach(ai=>{ %>
+      <tr class="<%= !ai.is_active?'dim':'' %>">
+        <td><div style="font-weight:600"><%= ai.name %><% if(ai.is_featured){ %> <span class="bx bx-y">★</span><% } %></div><div class="tx-xs tx-m"><%= ai.slug %></div></td>
+        <td><span class="tag"><%= ai.type %></span></td>
+        <td class="tx-sm tx-m"><%= ai.provider||'—' %></td>
+        <td><span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span></td>
+        <td class="tx-sm tx-m"><%= ai.difficulty_level %></td>
+        <td class="tx-sm"><%= ai.view_count||0 %></td>
+        <td><span class="<%= ai.is_active?'on-d':'off-d' %>"><%= ai.is_active?'● Actif':'● Inactif' %></span></td>
+        <td class="ac-cell">
+          <a href="/admin/ais/<%= ai.id %>/edit" class="btn btn-xs btn-o">✏</a>
+          <form action="/admin/ais/<%= ai.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ?')"><button class="btn btn-xs btn-r">✕</button></form>
+        </td>
+      </tr>
+      <% }) %>
+      <% if(!ais.length){ %><tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">Aucune IA</td></tr><% } %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,78 @@
+<!-- ============================================================
+     views/pages/tips.ejs  —  Astuces & Techniques IA
+     ============================================================ -->
+
+<!-- Styles spécifiques (déjà dans main.ejs) 
+     <link rel="stylesheet" href="/css/tips.css">
+-->
+
+<div class="page-header">
+  <h1>Astuces & Techniques IA</h1>
+  <p>Maîtrise l'art du prompting et des outils IA</p>
+</div>
+
+<div class="tips-container">
+  
+  <!-- Category Tabs -->
+  <div class="category-tabs">
+    <a href="/tips" class="tab-btn <%= !activeCategory ? 'active' : '' %>">
+      Toutes
+    </a>
+    <% categories.forEach(cat => { %>
+      <a href="/tips?category=<%= cat %>" 
+         class="tab-btn <%= activeCategory === cat ? 'active' : '' %>">
+        <%= cat %>
+      </a>
+    <% }) %>
+  </div>
+
+  <!-- Tips Grid -->
+  <div class="tips-grid">
+    <% tips.forEach((tip, i) => { %>
+    <div class="tip-card difficulty-border-<%= tip.difficulty %>">
+      
+      <!-- Numéro -->
+      <div class="tip-number">
+        <%= String(i + 1).padStart(2, '0') %>
+      </div>
+      
+      <!-- Contenu -->
+      <div class="tip-content">
+        <div class="tip-header">
+          <h3><%= tip.title %></h3>
+          <span class="tip-difficulty <%= tip.difficulty %>">
+            <%= tip.difficulty === 'beginner' ? 'Débutant' : 
+                tip.difficulty === 'intermediate' ? 'Intermédiaire' : 
+                'Avancé' %>
+          </span>
+        </div>
+        
+        <p><%= tip.content %></p>
+        
+        <div class="tip-meta">
+          <span class="tip-category">
+            <i class="lucide-tag" style="font-size:0.7rem;margin-right:0.2rem;"></i>
+            <%= tip.category %>
+          </span>
+        </div>
+      </div>
+      
+    </div>
+    <% }) %>
+  </div>
+
+  <!-- Empty State -->
+  <% if (tips.length === 0) { %>
+  <div class="empty-state">
+    <span class="empty-icon">💡</span>
+    <p>Aucune astuce disponible pour le moment</p>
+    <% if (isAdmin) { %>
+      <a href="/admin/content/tips" class="btn btn-primary">
+        Ajouter des astuces
+      </a>
+    <% } %>
+  </div>
+  <% } %>
+  
+</div>
+

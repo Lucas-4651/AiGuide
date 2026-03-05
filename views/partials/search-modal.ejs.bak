@@ -1,0 +1,55 @@
+<!-- SEARCH MODAL -->
+<div id="searchModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)" onclick="if(event.target===this)closeSearch()">
+  <div style="max-width:600px;margin:6rem auto 0;padding:0 1rem">
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.875rem 1rem;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--mu);font-size:1rem">🔍</span>
+        <input id="searchInput" type="text" placeholder="Rechercher IAs, astuces, flashcards, roadmaps..." style="flex:1;background:none;border:none;outline:none;color:var(--t);font-family:var(--f);font-size:.9rem" oninput="doSearch(this.value)" autocomplete="off">
+        <kbd style="font-size:.7rem;padding:.2rem .4rem;background:var(--bg3);border:1px solid var(--bd);border-radius:3px;color:var(--mu)">ESC</kbd>
+      </div>
+      <div id="searchResults" style="max-height:380px;overflow-y:auto;padding:.5rem">
+        <p style="text-align:center;color:var(--mu);font-size:.83rem;padding:1.5rem">Commence à taper pour chercher...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ICONS = { ia:'🤖', astuce:'💡', flashcard:'🃏', roadmap:'🗺️' };
+let searchTimer;
+
+function openSearch() {
+  document.getElementById('searchModal').style.display = 'block';
+  setTimeout(() => document.getElementById('searchInput').focus(), 50);
+}
+function closeSearch() {
+  document.getElementById('searchModal').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '<p style="text-align:center;color:var(--mu);font-size:.83rem;padding:1.5rem">Commence à taper pour chercher...</p>';
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if (e.key === 'Escape') closeSearch();
+});
+
+async function doSearch(q) {
+  clearTimeout(searchTimer);
+  if (q.length < 2) { document.getElementById('searchResults').innerHTML = '<p style="text-align:center;color:var(--mu);font-size:.83rem;padding:1.5rem">Commence à taper...</p>'; return; }
+  searchTimer = setTimeout(async () => {
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q));
+    const d = await r.json();
+    const box = document.getElementById('searchResults');
+    if (!d.results.length) { box.innerHTML = '<p style="text-align:center;color:var(--mu);font-size:.83rem;padding:1.5rem">Aucun résultat pour "' + q + '"</p>'; return; }
+    box.innerHTML = d.results.map(r => `
+      <a href="${r.url}" onclick="closeSearch()" style="display:flex;align-items:center;gap:.75rem;padding:.65rem .875rem;border-radius:var(--rs);color:var(--t);transition:background .12s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+        <span style="font-size:1.1rem;width:24px;text-align:center">${ICONS[r.type]||'📄'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.85rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.label}</div>
+          <div style="font-size:.72rem;color:var(--mu)">${r.type} · ${r.sub}</div>
+        </div>
+      </a>
+    `).join('');
+  }, 200);
+}
+</script>

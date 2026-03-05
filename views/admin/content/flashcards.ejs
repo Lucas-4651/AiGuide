@@ -1,0 +1,30 @@
+<div class="g2">
+  <div class="pn">
+    <div class="ph"><h3>+ Ajouter</h3></div>
+    <div class="pb">
+      <form action="/admin/content/flashcards" method="POST" class="form">
+        <div class="fgrp"><label>Terme *</label><input type="text" name="term" class="fi" required></div>
+        <div class="fgrp"><label>Définition *</label><textarea name="definition" class="ft" rows="4" required></textarea></div>
+        <div class="fgrp"><label>Exemple</label><textarea name="example" class="ft" rows="2"></textarea></div>
+        <div class="fg-g">
+          <div class="fgrp"><label>Catégorie</label><input type="text" name="category" class="fi" value="general"></div>
+          <div class="fgrp"><label>Difficulté</label><select name="difficulty" class="fs"><option value="1">1 — Débutant</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Avancé</option></select></div>
+          <div class="fgrp"><label>Ordre</label><input type="number" name="order_index" class="fi" value="0"></div>
+        </div>
+        <button type="submit" class="btn btn-p btn-fw">Ajouter</button>
+      </form>
+    </div>
+  </div>
+  <div class="pn">
+    <div class="ph"><h3><%= (cards||[]).length %> Flash Cards</h3></div>
+    <table class="tbl">
+      <thead><tr><th>Terme</th><th>Cat.</th><th>Diff.</th><th></th></tr></thead>
+      <tbody>
+        <% (cards||[]).forEach(c=>{ %>
+        <tr><td><div style="font-weight:500"><%= c.term %></div><div class="tx-xs tx-m"><%= (c.definition||'').slice(0,45) %>...</div></td><td><span class="tag"><%= c.category %></span></td><td class="tx-sm"><%= c.difficulty %></td><td class="ac-cell"><a href="/admin/content/flashcards/<%= c.id %>/edit" class="btn btn-xs btn-o">✏</a><form action="/admin/content/flashcards/<%= c.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ?')"><button class="btn btn-xs btn-r">✕</button></form></td></tr>
+        <% }) %>
+        <% if(!cards||!cards.length){ %><tr><td colspan="4" style="text-align:center;color:var(--mu);padding:1.25rem">Aucune carte</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

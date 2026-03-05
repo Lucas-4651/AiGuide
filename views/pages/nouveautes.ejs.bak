@@ -1,0 +1,56 @@
+<div class="ph">
+  <h1>🆕 Nouveautés</h1>
+  <p>Les dernières IAs ajoutées et les tendances du moment</p>
+</div>
+
+<% if(newAIs.length){ %>
+<div style="margin-bottom:2rem">
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+    ✨ Ajoutées ce mois-ci <span class="badge" style="background:rgba(34,197,94,.12);color:var(--gr)"><%= newAIs.length %> nouvelles</span>
+  </h2>
+  <div class="ai-grid">
+    <% newAIs.forEach(ai=>{ %>
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo"><%= ai.name[0] %></div>
+        <div class="ai-meta">
+          <div class="ai-name"><a href="/explore/<%= ai.slug %>"><%= ai.name %></a></div>
+          <span class="ai-type"><%= ai.type %></span>
+        </div>
+        <span class="badge" style="background:rgba(34,197,94,.12);color:var(--gr);font-size:.62rem">NEW</span>
+      </div>
+      <p class="ai-desc"><%= ai.short_description || (ai.description||'').slice(0,100) %>...</p>
+      <div class="ai-foot">
+        <span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+        <span class="text-muted" style="font-size:.72rem"><%= new Date(ai.created_at).toLocaleDateString('fr') %></span>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</div>
+<% } else { %>
+<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:2rem;text-align:center;margin-bottom:2rem;color:var(--mu)">Aucune IA ajoutée ce mois-ci.</div>
+<% } %>
+
+<div>
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem">🔥 Trending cette semaine</h2>
+  <div class="ai-grid">
+    <% trending.forEach((ai,i)=>{ %>
+    <div class="ai-card">
+      <div class="ai-head">
+        <div style="width:22px;font-size:.8rem;font-weight:800;color:var(--mu);text-align:center;flex-shrink:0">#<%= i+1 %></div>
+        <div class="ai-logo" style="width:32px;height:32px;font-size:.85rem"><%= ai.name[0] %></div>
+        <div class="ai-meta">
+          <div class="ai-name"><a href="/explore/<%= ai.slug %>"><%= ai.name %></a></div>
+          <span class="ai-type"><%= ai.type %></span>
+        </div>
+        <span class="text-muted" style="font-size:.72rem"><%= ai.view_count %> vues</span>
+      </div>
+      <div class="ai-foot" style="margin-top:.25rem">
+        <span class="pr-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+        <a href="/explore/<%= ai.slug %>" class="btn btn-gh btn-xs">Voir →</a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</div>

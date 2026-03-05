@@ -1,0 +1,132 @@
+<div style="max-width:1000px;margin:0 auto">
+
+  <!-- HEADER PROFIL -->
+  <div style="display:flex;align-items:flex-start;gap:1.5rem;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
+    <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;flex-shrink:0">
+      <% if(u.avatar_url){ %><img src="<%= u.avatar_url %>" style="width:100%;height:100%;border-radius:50%;object-fit:cover"><% } else { %><%= u.username[0].toUpperCase() %><% } %>
+    </div>
+    <div style="flex:1;min-width:200px">
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.35rem">
+        <h1 style="font-size:1.4rem;font-weight:800"><%= u.username %></h1>
+        <span class="badge badge-adm"><%= u.role %></span>
+        <% if(u.is_premium){ %><span class="badge badge-gold">⭐ Premium</span><% } %>
+      </div>
+      <p class="text-muted text-sm"><%= u.email %></p>
+      <p style="font-size:.875rem;color:var(--t);margin-top:.5rem"><%= u.bio || 'Aucune bio.' %></p>
+      <p style="font-size:.75rem;color:var(--mu);margin-top:.35rem;font-family:var(--mo)">Inscrit le <%= new Date(u.created_at).toLocaleDateString('fr') %></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <button onclick="document.getElementById('editModal').style.display='flex'" class="btn btn-gh btn-sm">✏ Modifier</button>
+      <a href="/profile/<%= u.id %>" class="btn btn-gh btn-sm" target="_blank">🔗 Voir public</a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-bottom:1.25rem">
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem;text-align:center">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--ac)"><%= stats.prompts %></div>
+      <div class="text-muted text-sm">Prompts générés</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem;text-align:center">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--ac2)"><%= stats.favs %></div>
+      <div class="text-muted text-sm">IAs favorites</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem;text-align:center">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--ye)">🔥 <%= stats.streak %></div>
+      <div class="text-muted text-sm">Jours de streak</div>
+    </div>
+  </div>
+
+  <!-- DEFI DU JOUR -->
+  <% if(challenge){ %>
+  <div id="challengeBox" style="background:linear-gradient(135deg,rgba(124,92,252,.1),rgba(0,212,255,.06));border:1px solid rgba(124,92,252,.3);border-radius:var(--r);padding:1.35rem;margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
+      <div>
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);margin-bottom:.35rem">🎯 Défi du jour</div>
+        <p style="font-size:.9rem;font-weight:600"><%= challenge.challenge_text %></p>
+        <p class="text-muted text-sm" style="margin-top:.25rem">Type : <%= challenge.type %></p>
+      </div>
+      <% if(isDone){ %>
+        <span style="color:var(--gr);font-weight:700;font-size:.9rem">✓ Complété aujourd'hui !</span>
+      <% } else { %>
+        <button onclick="completeChallenge()" class="btn btn-p btn-sm">✓ Marquer complété</button>
+      <% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start">
+    <!-- FAVORIS -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+        <h3 style="font-size:.85rem;font-weight:600;color:var(--t2)">❤️ Favoris (<%= favs.length %>)</h3>
+        <a href="/favorites" style="font-size:.72rem;color:var(--ac)">Voir tous →</a>
+      </div>
+      <% if(favs.length){ %>
+        <% favs.slice(0,5).forEach(ai=>{ %>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border-bottom:1px solid var(--bd)">
+          <div>
+            <a href="/explore/<%= ai.slug %>" style="font-size:.83rem;font-weight:600;color:var(--t)"><%= ai.name %></a>
+            <div class="text-muted" style="font-size:.7rem"><%= ai.type %></div>
+          </div>
+          <span class="pr-<%= ai.pricing_type %>" style="font-size:.72rem"><%= ai.pricing_type %></span>
+        </div>
+        <% }) %>
+      <% } else { %>
+        <div style="text-align:center;padding:1.75rem;color:var(--mu)">Aucun favori pour l'instant.<br><a href="/explore" style="font-size:.83rem">Explorer les IAs →</a></div>
+      <% } %>
+    </div>
+
+    <!-- DERNIERS PROMPTS -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+        <h3 style="font-size:.85rem;font-weight:600;color:var(--t2)">⚡ Derniers prompts</h3>
+        <a href="/generator/history" style="font-size:.72rem;color:var(--ac)">Voir tous →</a>
+      </div>
+      <% if(prompts.length){ %>
+        <% prompts.forEach(p=>{ %>
+        <div style="padding:.65rem 1rem;border-bottom:1px solid var(--bd)">
+          <div style="font-size:.8rem;color:var(--t)"><%= (p.intention||'').slice(0,60) %>...</div>
+          <div style="display:flex;gap:.5rem;align-items:center;margin-top:.25rem">
+            <span class="tag"><%= p.target_ai||'—' %></span>
+            <span class="text-muted" style="font-size:.68rem"><%= new Date(p.created_at).toLocaleDateString('fr') %></span>
+          </div>
+        </div>
+        <% }) %>
+      <% } else { %>
+        <div style="text-align:center;padding:1.75rem;color:var(--mu)">Aucun prompt encore.<br><a href="/generator" style="font-size:.83rem">Générer un prompt →</a></div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.75rem;width:100%;max-width:440px;margin:1rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1.25rem">
+      <h3 style="font-weight:700">Modifier mon profil</h3>
+      <button onclick="document.getElementById('editModal').style.display='none'" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:1.2rem">✕</button>
+    </div>
+    <form action="/profile/edit" method="POST" style="display:flex;flex-direction:column;gap:.875rem">
+      <div class="form-group">
+        <label>URL Avatar</label>
+        <input type="url" name="avatar_url" value="<%= u.avatar_url||'' %>" class="form-input" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea name="bio" class="form-textarea" rows="3" placeholder="Parle de toi..."><%= u.bio||'' %></textarea>
+      </div>
+      <div style="display:flex;gap:.6rem">
+        <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn btn-gh" style="flex:1">Annuler</button>
+        <button type="submit" class="btn btn-p" style="flex:1">💾 Sauvegarder</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+async function completeChallenge() {
+  const r = await fetch('/api/challenge/complete', { method:'POST', headers:{'Content-Type':'application/json'} });
+  const d = await r.json();
+  if (d.ok) { document.getElementById('challengeBox').innerHTML = '<p style="color:var(--gr);font-weight:700;padding:.5rem">✓ Défi complété ! Streak mis à jour 🔥</p>'; }
+}
+</script>

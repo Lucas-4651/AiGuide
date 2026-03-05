@@ -1,0 +1,85 @@
+<!-- ============================================================
+     views/layouts/main.ejs
+     Layout principal du site - TOUS les styles/scripts sont ici
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Guide - Du débutant à l'expert en IA.">
+  <meta name="theme-color" content="#7c5cfc">
+  
+  <title><%= title ? title + ' | ' : '' %>AI Guide</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/font/lucide.css">
+  
+  <!-- ========== TOUS LES CSS ========== -->
+  <link rel="stylesheet" href="/css/style.css">        <!-- Global -->
+  <link rel="stylesheet" href="/css/homepage.css">     <!-- Page d'accueil -->
+  <link rel="stylesheet" href="/css/advisor.css">      <!-- Page advisor -->
+  <link rel="stylesheet" href="/css/ai-detail.css">    <!-- Page détail IA -->
+  <link rel="stylesheet" href="/css/flashcards.css">
+  <link rel="stylesheet" href="/css/tips.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/generator.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+</head>
+
+<body>
+  <!-- Navigation -->
+  <%- include('../partials/navbar') %>
+
+  <!-- Contenu principal -->
+  <main class="wrap" id="main-content">
+    <!-- Messages flash -->
+    <%- include('../partials/flash') %>
+    
+    <!-- Contenu spécifique à la page -->
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Search Modal -->
+  <%- include('../partials/search-modal') %>
+
+  <!-- Easter Egg -->
+  <%- include('../partials/easter-egg') %>
+
+  <!-- ========== TOUS LES SCRIPTS ========== -->
+  <script src="/js/main.js" defer></script>           <!-- Global -->
+  <script src="/js/challenge.js" defer></script>      <!-- Défi (page accueil) -->
+  <script src="/js/advisor.js" defer></script>        <!-- Page advisor -->
+  <script src="/js/flashcards.js" defer></script>
+  <script src="/js/tips.js" defer></script>
+  <script src="/js/generator.js" defer></script>
+  <!-- Scroll to top button -->
+  <button id="scrollTop" class="scroll-top" aria-label="Retour en haut" style="display:none">↑</button>
+
+  <script>
+    // Scroll to top functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollBtn = document.getElementById('scrollTop');
+      if (scrollBtn) {
+        window.addEventListener('scroll', function() {
+          scrollBtn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+        });
+        
+        scrollBtn.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    });
+  </script>
+</body>
+</html>

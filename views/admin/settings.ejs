@@ -1,0 +1,15 @@
+<div class="pn" style="max-width:600px">
+  <div class="ph"><h3>Paramètres du site</h3></div>
+  <div class="pb">
+    <form action="/admin/settings" method="POST" class="form">
+      <% (settings||[]).forEach(s=>{ %>
+      <div class="fgrp">
+        <label><%= s.key %><% if(s.description){ %> <span style="font-weight:400;text-transform:none;color:var(--mu)">— <%= s.description %></span><% } %></label>
+        <input type="text" name="<%= s.key %>" value="<%= s.value||'' %>" class="fi">
+      </div>
+      <% }) %>
+      <% if(!settings||!settings.length){ %><p class="tx-m tx-sm">Aucun paramètre défini.</p><% } %>
+      <div class="fa"><button type="submit" class="btn btn-p">💾 Sauvegarder</button></div>
+    </form>
+  </div>
+</div>

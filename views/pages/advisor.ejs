@@ -1,0 +1,251 @@
+<!-- ============================================================
+     views/pages/advisor.ejs
+     IA Advisor - Questionnaire et résultats personnalisés
+     ============================================================ -->
+
+
+
+<div class="ph">
+  <h1>🤖 IA Advisor</h1>
+  <p>Réponds à 4 questions, on trouve les IAs qui te correspondent</p>
+</div>
+
+<% if(!result){ %>
+
+<!-- ========== FORMULAIRE ========== -->
+<div style="max-width:640px;margin:0 auto">
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:2rem">
+    <form action="/advisor" method="POST" style="display:flex;flex-direction:column;gap:1.5rem">
+
+      <!-- Question 1 : Projet -->
+      <div class="form-group">
+        <label for="goal" style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;display:block">
+          1. Décris ton projet ou objectif <span style="color:var(--ac)">*</span>
+        </label>
+        <textarea 
+          name="goal" 
+          id="goal" 
+          class="form-textarea" 
+          rows="4" 
+          placeholder="Ex: Je veux créer du contenu pour mes réseaux sociaux, automatiser mes emails, ou générer des images pour mon blog..."
+          required
+        ></textarea>
+        <div style="font-size:.75rem;color:var(--t2);margin-top:.25rem">
+          Sois précis pour de meilleures recommandations
+        </div>
+      </div>
+
+      <!-- Question 2 : Niveau -->
+      <div class="form-group">
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend style="font-size:.85rem;font-weight:700;margin-bottom:.75rem;display:block">
+            2. Ton niveau avec l'IA ?
+          </legend>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+            <% 
+              const levels = [
+                ['beginner', '🌱 Débutant', 'Je découvre'],
+                ['intermediate', '⚡ Intermédiaire', 'J\'ai déjà testé'],
+                ['advanced', '🔥 Avancé', 'Je suis expert']
+              ];
+              levels.forEach(([val, label, hint]) => { 
+            %>
+            <label class="radio-card">
+              <input type="radio" name="level" value="<%= val %>" class="radio-hidden">
+              <span class="radio-label"><%= label %></span>
+              <span class="radio-hint"><%= hint %></span>
+            </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Question 3 : Budget -->
+      <div class="form-group">
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend style="font-size:.85rem;font-weight:700;margin-bottom:.75rem;display:block">
+            3. Ton budget ?
+          </legend>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+            <% 
+              const budgets = [
+                ['gratuit', '🆓 Gratuit', 'Uniquement gratuit'],
+                ['freemium', '⚡ Freemium', 'Gratuit + options payantes'],
+                ['peu importe', '💰 Peu importe', 'Tous les budgets']
+              ];
+              budgets.forEach(([val, label, hint]) => { 
+            %>
+            <label class="radio-card">
+              <input type="radio" name="budget" value="<%= val %>" class="radio-hidden">
+              <span class="radio-label"><%= label %></span>
+              <span class="radio-hint"><%= hint %></span>
+            </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Question 4 : Usage -->
+      <div class="form-group">
+        <label for="usage" style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;display:block">
+          4. Usage principal ?
+        </label>
+        <select name="usage" id="usage" class="form-select" style="width:100%">
+          <option value="">-- Sélectionne une catégorie --</option>
+          <option value="texte">✍️ Écriture / Contenu / Copywriting</option>
+          <option value="code">💻 Code / Programmation / Dev</option>
+          <option value="image">🎨 Image / Design / Création visuelle</option>
+          <option value="data">📊 Data / Analyse / Recherche</option>
+          <option value="audio">🎵 Audio / Musique / Voix</option>
+          <option value="video">🎬 Vidéo / Animation</option>
+          <option value="productivite">⚡ Productivité / Automatisation</option>
+        </select>
+      </div>
+
+      <!-- Bouton submit -->
+      <button type="submit" class="btn btn-p btn-fw btn-lg" style="margin-top:1rem">
+        🔍 Trouver mes IAs recommandées →
+      </button>
+    </form>
+
+    <!-- Petit message rassurant -->
+    <div style="text-align:center;margin-top:1.5rem;font-size:.8rem;color:var(--t2)">
+      ✨ Nos recommandations sont basées sur l'analyse de +100 IAs
+    </div>
+  </div>
+</div>
+
+<% } else { %>
+
+<!-- ========== RÉSULTATS ========== -->
+<div style="max-width:1200px;margin:0 auto">
+  
+  <!-- En-tête des résultats -->
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;margin-bottom:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <div style="font-size:.8rem;color:var(--mu);margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem">
+        <span>🔍 Résultats pour</span>
+        <span style="background:var(--bg3);padding:.15rem .5rem;border-radius:99px;font-size:.7rem"><%= result.length %> IA trouvée(s)</span>
+      </div>
+      
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.25rem"><%= goal || 'ton projet' %></div>
+      
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem">
+        <% if(level) { %>
+          <span style="background:rgba(124,92,252,.1);color:var(--ac);padding:.2rem .75rem;border-radius:99px;font-size:.75rem;font-weight:500">
+            🌱 <%= level === 'beginner' ? 'Débutant' : level === 'intermediate' ? 'Intermédiaire' : 'Avancé' %>
+          </span>
+        <% } %>
+        
+        <% if(budget) { %>
+          <span style="background:rgba(124,92,252,.1);color:var(--ac);padding:.2rem .75rem;border-radius:99px;font-size:.75rem;font-weight:500">
+            💰 <%= budget === 'gratuit' ? 'Gratuit' : budget === 'freemium' ? 'Freemium' : 'Tous budgets' %>
+          </span>
+        <% } %>
+        
+        <% if(usage) { %>
+          <span style="background:rgba(124,92,252,.1);color:var(--ac);padding:.2rem .75rem;border-radius:99px;font-size:.75rem;font-weight:500">
+            📋 <%= 
+              usage === 'texte' ? 'Écriture' : 
+              usage === 'code' ? 'Développement' : 
+              usage === 'image' ? 'Image/Design' : 
+              usage === 'data' ? 'Data' : 
+              usage === 'audio' ? 'Audio' : 
+              usage === 'video' ? 'Vidéo' : 'Productivité'
+            %>
+          </span>
+        <% } %>
+      </div>
+    </div>
+    
+    <a href="/advisor" class="btn btn-gh" style="display:flex;align-items:center;gap:.25rem">
+      <span>🔄</span> Refaire le quiz
+    </a>
+  </div>
+
+  <!-- Liste des résultats -->
+  <% if(result.length){ %>
+    <div class="ai-grid">
+      <% result.forEach((ai, index) => { 
+        const isTopMatch = index === 0;
+      %>
+      <div class="ai-card <%= isTopMatch ? 'top-match' : '' %>" style="<%= isTopMatch ? 'border-color:var(--ac);' : '' %>">
+        
+        <!-- Badge meilleur match -->
+        <% if(isTopMatch) { %>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <span style="font-size:.7rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;background:rgba(124,92,252,.1);padding:.2rem .75rem;border-radius:99px">
+              ⭐ Meilleure correspondance
+            </span>
+            <span class="score-badge" title="Score de pertinence basé sur tes critères">
+              <%= ai._score %> pts
+            </span>
+          </div>
+        <% } %>
+
+        <!-- En-tête de la carte -->
+        <div class="ai-card-header">
+          <div class="ai-logo"><%= ai.name ? ai.name[0] : 'IA' %></div>
+          <div class="ai-meta">
+            <div class="ai-name">
+              <a href="/explore/<%= ai.slug %>">
+                <%= ai.name %>
+              </a>
+            </div>
+            <span class="ai-type"><%= (ai.type || '').replace(/_/g, ' ') %></span>
+          </div>
+          <% if(!isTopMatch) { %>
+            <span class="score-badge"><%= ai._score %> pts</span>
+          <% } %>
+        </div>
+
+        <!-- Description -->
+        <p class="ai-desc">
+          <%= ai.short_description || (ai.description || '').substring(0, 120) + '...' %>
+        </p>
+
+        <!-- Tags -->
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin:.75rem 0">
+          <% if(ai.tags && ai.tags.length) { %>
+            <% ai.tags.slice(0, 3).forEach(tag => { %>
+              <span class="tag">#<%= tag %></span>
+            <% }) %>
+          <% } %>
+        </div>
+
+        <!-- Footer -->
+        <div class="ai-card-footer">
+          <span class="pr-<%= ai.pricing_type %>" style="padding:.2rem .75rem;border-radius:99px;font-size:.75rem">
+            <%= ai.pricing_type === 'free' ? '🆓 Gratuit' : ai.pricing_type === 'freemium' ? '⚡ Freemium' : '💰 Payant' %>
+          </span>
+          <a href="/explore/<%= ai.slug %>" class="btn btn-gh btn-sm">
+            Voir détails →
+          </a>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- Message supplémentaire -->
+    <div style="text-align:center;margin-top:2rem;padding:1.5rem;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd)">
+      <p style="margin-bottom:.5rem">🔍 Pas convaincu ?</p>
+      <a href="/advisor" class="btn btn-gh">Essayer d'autres critères</a>
+      <span style="margin:0 .75rem;color:var(--t2)">ou</span>
+      <a href="/explore" class="btn btn-p">Explorer toutes les IAs</a>
+    </div>
+
+  <% } else { %>
+    <!-- Pas de résultats -->
+    <div style="text-align:center;padding:3rem 1rem;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd)">
+      <div style="font-size:4rem;margin-bottom:1rem;opacity:0.5">😕</div>
+      <h3 style="margin-bottom:.5rem">Aucune IA trouvée</h3>
+      <p style="color:var(--t2);margin-bottom:1.5rem">Aucune IA ne correspond exactement à tes critères</p>
+      <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+        <a href="/advisor" class="btn btn-p">🔄 Modifier les critères</a>
+        <a href="/explore" class="btn btn-gh">🔍 Voir toutes les IAs</a>
+      </div>
+    </div>
+  <% } %>
+</div>
+<% } %>
+

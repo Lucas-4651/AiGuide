@@ -1,0 +1,55 @@
+<!-- ============================================================
+     views/pages/recommendations.ejs  —  Resultats recommandation
+     ============================================================ -->
+<div class="page-header">
+  <h1>IAs recommandees 🎯</h1>
+  <p>Pour ton projet : "<em><%= description %></em>"</p>
+</div>
+
+<div style="max-width:1000px;margin:0 auto">
+  <% if (result.detectedType || result.detectedPricing || result.detectedLevel) { %>
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem">
+    <span style="font-size:0.85rem;color:var(--text-muted)">Detecte :</span>
+    <% if (result.detectedType)    { %><span class="tag">Type : <%= result.detectedType.replace(/_/g,' ') %></span><% } %>
+    <% if (result.detectedPricing) { %><span class="tag">Prix : <%= result.detectedPricing %></span><% } %>
+    <% if (result.detectedLevel)   { %><span class="tag">Niveau : <%= result.detectedLevel %></span><% } %>
+  </div>
+  <% } %>
+
+  <% if (result.recommendations.length === 0) { %>
+  <div class="empty-state">
+    <span class="empty-icon">🤔</span>
+    <p>Aucune IA correspondante trouvee. Essaie de reformuler ton projet.</p>
+    <a href="/explore" class="btn btn-primary">Explorer toutes les IAs</a>
+  </div>
+  <% } else { %>
+  <div class="ai-grid">
+    <% result.recommendations.forEach((ai, i) => { %>
+    <div class="ai-card" style="<%= i === 0 ? 'border-color:var(--accent);box-shadow:0 0 0 1px rgba(124,92,252,0.3)' : '' %>">
+      <% if (i === 0) { %>
+        <div style="font-size:0.75rem;color:var(--accent);font-family:var(--font-mono);margin-bottom:0.5rem">⭐ MEILLEUR CHOIX</div>
+      <% } %>
+      <div class="ai-card-header">
+        <div class="ai-logo"><%= ai.name[0] %></div>
+        <div class="ai-meta">
+          <h3 class="ai-name"><a href="/explore/<%= ai.slug %>"><%= ai.name %></a></h3>
+          <span class="ai-type"><%= (ai.type||'').replace(/_/g,' ') %></span>
+        </div>
+        <span class="ai-pricing pricing-<%= ai.pricing_type %>"><%= ai.pricing_type %></span>
+      </div>
+      <p class="ai-desc"><%= ai.short_description || (ai.description||'').slice(0, 100) %></p>
+      <div class="ai-footer">
+        <span class="difficulty difficulty-<%= ai.difficulty_level %>"><%= ai.difficulty_level %></span>
+        <a href="/explore/<%= ai.slug %>" class="btn btn-sm btn-ghost">Details →</a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <div style="margin-top:2rem;text-align:center;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="/explore" class="btn btn-outline">Voir toutes les IAs</a>
+    <a href="/generator" class="btn btn-primary">⚡ Generer un prompt</a>
+  </div>
+  <% } %>
+</div>
+
+

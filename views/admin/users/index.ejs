@@ -1,0 +1,34 @@
+<div class="tb2">
+  <div class="tb2-l"><span class="tx-m tx-sm">Total : <strong><%= total %></strong></span></div>
+  <div class="tb2-r">
+    <div class="pagi">
+      <% if(page>1){ %><a href="/admin/users?page=<%= page-1 %>" class="btn btn-xs btn-o">← Préc.</a><% } %>
+      <span>Page <%= page %> / <%= pages %></span>
+      <% if(page<pages){ %><a href="/admin/users?page=<%= page+1 %>" class="btn btn-xs btn-o">Suiv. →</a><% } %>
+    </div>
+  </div>
+</div>
+<div class="pn">
+  <table class="tbl">
+    <thead><tr><th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Auth</th><th>Statut</th><th>Inscrit</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% users.forEach(u=>{ %>
+      <tr class="<%= !u.is_active?'dim':'' %>">
+        <td><div class="uc"><div class="uav"><%= u.username[0].toUpperCase() %></div><strong><%= u.username %></strong></div></td>
+        <td class="tx-sm tx-m"><%= u.email %></td>
+        <td><span class="bx bx-<%= u.role==='admin'?'a':'u' %>"><%= u.role %></span></td>
+        <td class="tx-sm tx-m"><%= u.oauth_provider||'local' %></td>
+        <td><span class="<%= u.is_active?'on-d':'off-d' %>"><%= u.is_active?'● Actif':'● Banni' %></span></td>
+        <td class="tx-xs tx-m"><%= new Date(u.created_at).toLocaleDateString('fr') %></td>
+        <td class="ac-cell">
+          <a href="/admin/users/<%= u.id %>" class="btn btn-xs btn-o">Voir</a>
+          <form action="/admin/users/<%= u.id %>/role" method="POST" style="display:inline"><button class="btn btn-xs btn-y"><%= u.role==='admin'?'↓ User':'↑ Admin' %></button></form>
+          <form action="/admin/users/<%= u.id %>/toggle" method="POST" style="display:inline"><button class="btn btn-xs <%= u.is_active?'btn-r':'btn-g' %>"><%= u.is_active?'Bannir':'Réactiver' %></button></form>
+          <form action="/admin/users/<%= u.id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ?')"><button class="btn btn-xs btn-r">✕</button></form>
+        </td>
+      </tr>
+      <% }) %>
+      <% if(!users.length){ %><tr><td colspan="7" style="text-align:center;color:var(--mu);padding:2rem">Aucun utilisateur</td></tr><% } %>
+    </tbody>
+  </table>
+</div>

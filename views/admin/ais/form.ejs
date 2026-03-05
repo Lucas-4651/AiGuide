@@ -1,0 +1,47 @@
+<div class="tb2"><div class="tb2-l"><a href="/admin/ais" class="btn btn-o btn-sm">← Retour</a></div></div>
+<div class="pn"><div class="pb">
+<form action="<%= action %>" method="<%= method %>" class="form">
+  <div class="fg-g">
+    <div class="fgrp"><label>Nom *</label><input type="text" name="name" value="<%= ai?ai.name:'' %>" class="fi" required></div>
+    <div class="fgrp"><label>Slug</label><input type="text" name="slug" value="<%= ai?ai.slug:'' %>" class="fi" placeholder="auto"></div>
+    <div class="fgrp"><label>Description courte</label><input type="text" name="short_description" value="<%= ai?(ai.short_description||''):'' %>" class="fi"></div>
+    <div class="fgrp"><label>Type *</label>
+      <select name="type" class="fs" required>
+        <option value="">-- Choisir --</option>
+        <% ['text_generation','image_generation','code','audio','video','multimodal','data_analysis','search','other'].forEach(t=>{ %>
+        <option value="<%= t %>" <%= ai&&ai.type===t?'selected':'' %>><%= t.replace(/_/g,' ') %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="fgrp"><label>Fournisseur</label><input type="text" name="provider" value="<%= ai?(ai.provider||''):'' %>" class="fi" placeholder="OpenAI..."></div>
+    <div class="fgrp"><label>Site web</label><input type="url" name="website_url" value="<%= ai?(ai.website_url||''):'' %>" class="fi" placeholder="https://..."></div>
+    <div class="fgrp"><label>Tarification</label>
+      <select name="pricing_type" class="fs">
+        <% ['free','freemium','paid','open_source'].forEach(p=>{ %><option value="<%= p %>" <%= ai&&ai.pricing_type===p?'selected':'' %>><%= p %></option><% }) %>
+      </select>
+    </div>
+    <div class="fgrp"><label>Détail prix</label><input type="text" name="price_info" value="<%= ai?(ai.price_info||''):'' %>" class="fi" placeholder="Gratuit / 20$/mois"></div>
+    <div class="fgrp"><label>Niveau</label>
+      <select name="difficulty_level" class="fs">
+        <% ['beginner','intermediate','advanced'].forEach(d=>{ %><option value="<%= d %>" <%= ai&&ai.difficulty_level===d?'selected':'' %>><%= d %></option><% }) %>
+      </select>
+    </div>
+    <div class="fgrp"><label>URL Logo</label><input type="text" name="logo_url" value="<%= ai?(ai.logo_url||''):'' %>" class="fi"></div>
+  </div>
+  <div class="fgrp fw"><label>Description *</label><textarea name="description" class="ft" rows="4" required><%= ai?ai.description:'' %></textarea></div>
+  <div class="fg3">
+    <div class="fgrp"><label>Points forts (1/ligne)</label><textarea name="strengths" class="ft" rows="5"><%= ai?(ai.strengths||[]).join('\n'):'' %></textarea></div>
+    <div class="fgrp"><label>Limites (1/ligne)</label><textarea name="limitations" class="ft" rows="5"><%= ai?(ai.limitations||[]).join('\n'):'' %></textarea></div>
+    <div class="fgrp"><label>Cas d'usage (1/ligne)</label><textarea name="use_cases" class="ft" rows="5"><%= ai?(ai.use_cases||[]).join('\n'):'' %></textarea></div>
+  </div>
+  <div class="fgrp"><label>Tags (1/ligne)</label><textarea name="tags" class="ft" rows="2"><%= ai?(ai.tags||[]).join('\n'):'' %></textarea></div>
+  <div class="fch">
+    <label class="fcl"><input type="checkbox" name="is_featured" value="1" <%= ai&&ai.is_featured?'checked':'' %>> Vedette</label>
+    <label class="fcl"><input type="checkbox" name="is_active" value="1" <%= !ai||ai.is_active?'checked':'' %>> Active</label>
+  </div>
+  <div class="fa">
+    <a href="/admin/ais" class="btn btn-o">Annuler</a>
+    <button type="submit" class="btn btn-p"><%= ai?'💾 Mettre à jour':'+ Ajouter' %></button>
+  </div>
+</form>
+</div></div>

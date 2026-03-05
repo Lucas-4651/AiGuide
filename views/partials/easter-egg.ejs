@@ -1,0 +1,88 @@
+<!-- ── EASTER EGG — MODE HACKER ──────────────────────────────── -->
+<div id="hackerMode" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;cursor:pointer" onclick="disableHacker()">
+  <canvas id="hackerCanvas"></canvas>
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:1;pointer-events:none">
+    <div style="font-family:'JetBrains Mono',monospace;color:#00ff41;font-size:clamp(1rem,3vw,1.6rem);font-weight:700;text-shadow:0 0 20px #00ff41;margin-bottom:.5rem">AI GUIDE — HACKER MODE</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:#00ff4188;font-size:.75rem">KONAMI CODE ACTIVÉ · Clique pour quitter</div>
+  </div>
+</div>
+
+<!-- ── BADGE NOTIF ─────────────────────────────────────────────── -->
+<div id="badgeNotif" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;background:var(--bg2);border:1px solid var(--ac);border-radius:var(--r);padding:1rem 1.25rem;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:280px;animation:slideIn .3s ease">
+  <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);margin-bottom:.35rem">🏆 Badge débloqué !</div>
+  <div id="badgeIcon" style="font-size:1.75rem;margin-bottom:.25rem"></div>
+  <div id="badgeLabel" style="font-weight:700;font-size:.9rem"></div>
+  <div id="badgeDesc" style="font-size:.75rem;color:var(--t2);margin-top:.15rem"></div>
+</div>
+
+<style>
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+</style>
+
+<script>
+// ── KONAMI CODE ─────────────────────────────────────────────────
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kSeq = [];
+document.addEventListener('keydown', e => {
+  kSeq.push(e.key);
+  if (kSeq.length > KONAMI.length) kSeq.shift();
+  if (JSON.stringify(kSeq) === JSON.stringify(KONAMI)) enableHacker();
+});
+
+function enableHacker() {
+  const el = document.getElementById('hackerMode');
+  el.style.display = 'block';
+  const canvas = document.getElementById('hackerCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const cols = Math.floor(canvas.width / 14);
+  const drops = Array(cols).fill(1);
+  const chars = 'アイウエオカキクケコABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+  let raf;
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '13px JetBrains Mono, monospace';
+    drops.forEach((y,i) => {
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, y*14);
+      if (y*14 > canvas.height && Math.random() > .975) drops[i] = 0;
+      drops[i]++;
+    });
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+  el._raf = raf;
+}
+function disableHacker() {
+  const el = document.getElementById('hackerMode');
+  cancelAnimationFrame(el._raf);
+  el.style.display = 'none';
+}
+
+// ── BADGE NOTIFICATION ───────────────────────────────────────────
+function showBadge(icon, label, desc) {
+  const n = document.getElementById('badgeNotif');
+  document.getElementById('badgeIcon').textContent = icon;
+  document.getElementById('badgeLabel').textContent = label;
+  document.getElementById('badgeDesc').textContent = desc;
+  n.style.display = 'block';
+  setTimeout(() => { n.style.opacity='0';n.style.transform='translateX(20px)';n.style.transition='all .4s'; setTimeout(()=>{ n.style.display='none';n.style.opacity='';n.style.transform=''; },400); }, 4000);
+}
+
+// ── CHECK BADGES DEPUIS SESSION ──────────────────────────────────
+<% if(typeof user !== 'undefined' && user){ %>
+async function checkNewBadges() {
+  // Le backend check lors de chaque génération, on poll juste au chargement
+  const r = await fetch('/api/badges/check', { method:'POST' }).catch(()=>null);
+  if (!r) return;
+  const d = await r.json().catch(()=>null);
+  if (d && d.new && d.new.length) {
+    const b = d.new[0];
+    showBadge(b.icon, b.label, b.desc);
+  }
+}
+setTimeout(checkNewBadges, 2000);
+<% } %>
+</script>

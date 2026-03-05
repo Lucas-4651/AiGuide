@@ -1,0 +1,97 @@
+<div class="ph">
+  <h1>Mes Prompts</h1>
+  <p><%= prompts.length %> prompt<%= prompts.length>1?'s':'' %></p>
+</div>
+<div style="max-width:900px;margin:0 auto">
+
+  <!-- TOOLBAR RECHERCHE + EXPORT -->
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem">
+    <form method="GET" action="/generator/history" style="display:flex;flex-wrap:wrap;gap:.65rem;align-items:flex-end">
+      <div class="form-group" style="flex:2;min-width:180px">
+        <label>Rechercher</label>
+        <input type="text" name="q" value="<%= typeof q!=='undefined'?q:'' %>" class="form-input" placeholder="Mot-clé dans l'intention ou le prompt...">
+      </div>
+      <div class="form-group" style="flex:1;min-width:140px">
+        <label>IA utilisée</label>
+        <select name="ai" class="form-select">
+          <option value="">Toutes</option>
+          <% (typeof ais!=='undefined'?ais:[]).forEach(a=>{ %>
+          <option value="<%= a %>" <%= typeof ai!=='undefined'&&ai===a?'selected':'' %>><%= a %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group" style="min-width:130px">
+        <label>Du</label>
+        <input type="date" name="from" value="<%= typeof from!=='undefined'?from:'' %>" class="form-input">
+      </div>
+      <div class="form-group" style="min-width:130px">
+        <label>Au</label>
+        <input type="date" name="to" value="<%= typeof to!=='undefined'?to:'' %>" class="form-input">
+      </div>
+      <button type="submit" class="btn btn-p btn-sm">Filtrer</button>
+      <a href="/generator/history" class="btn btn-gh btn-sm">Reset</a>
+    </form>
+    <!-- Exports -->
+    <div style="display:flex;gap:.5rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bd)">
+      <span style="font-size:.75rem;color:var(--mu);align-self:center">Exporter :</span>
+      <a href="/generator/history?<%= new URLSearchParams(typeof q!=='undefined'&&q?{q}:{}).toString() %>&format=md" class="btn btn-xs btn-gh">📄 Markdown</a>
+      <a href="/generator/history?<%= new URLSearchParams(typeof q!=='undefined'&&q?{q}:{}).toString() %>&format=txt" class="btn btn-xs btn-gh">📝 Texte</a>
+      <% if(typeof user!=='undefined'&&user){ %>
+      <a href="/collections" class="btn btn-xs btn-gh" style="margin-left:auto">📂 Mes collections</a>
+      <% } %>
+    </div>
+  </div>
+
+  <% if(!prompts.length){ %>
+  <div class="empty"><span class="empty-ico">⚡</span><p>Aucun prompt trouvé.</p><a href="/generator" class="btn btn-p">Générer un prompt</a></div>
+  <% } else { %>
+  <div style="display:flex;flex-direction:column;gap:.875rem">
+    <% prompts.forEach(p=>{ %>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.65rem;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:.2rem"><%= p.intention.slice(0,80) %><%= p.intention.length>80?'...':'' %></div>
+          <div style="font-size:.7rem;color:var(--mu)">
+            <% if(p.target_ai){ %><span class="tag"><%= p.target_ai %></span> <% } %>
+            <%= new Date(p.created_at).toLocaleString('fr') %>
+            <% if(p.rating){ %> · ⭐ <%= p.rating %>/5<% } %>
+          </div>
+        </div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+          <button onclick="copyPr(this,'<%= encodeURIComponent(p.generated_prompt) %>')" class="btn btn-xs btn-gh">Copier</button>
+          <% if(typeof user!=='undefined'&&user&&typeof collections!=='undefined'&&collections.length){ %>
+          <button onclick="openAddToCol(<%= p.id %>)" class="btn btn-xs btn-gh">+ Collection</button>
+          <% } %>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:.75rem;font-family:var(--mo);font-size:.78rem;line-height:1.65;white-space:pre-wrap;max-height:130px;overflow:hidden;cursor:pointer" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'130px':'none'"><%= p.generated_prompt %></div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<!-- Modal ajouter à collection -->
+<% if(typeof user!=='undefined'&&user&&typeof collections!=='undefined'&&collections.length){ %>
+<div id="colModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;width:100%;max-width:380px;margin:1rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem"><h3 style="font-size:.95rem;font-weight:700">Ajouter à une collection</h3><button onclick="document.getElementById('colModal').style.display='none'" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:1.1rem">✕</button></div>
+    <div id="colList">
+      <% collections.forEach(c=>{ %>
+      <button onclick="addToCol(<%= c.id %>)" style="display:block;width:100%;text-align:left;padding:.65rem .875rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-size:.83rem;cursor:pointer;margin-bottom:.4rem;transition:border-color .12s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'">📂 <%= c.name %><% if(c.is_public){ %> <span style="font-size:.68rem;color:var(--mu)">· public</span><% } %></button>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<script>
+let _currentPromptId = null;
+function copyPr(btn, enc){ navigator.clipboard.writeText(decodeURIComponent(enc));btn.textContent='✓';setTimeout(()=>btn.textContent='Copier',2000); }
+function openAddToCol(pid){ _currentPromptId = pid; document.getElementById('colModal').style.display='flex'; }
+async function addToCol(cid) {
+  const r = await fetch('/api/collections/add', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ collection_id:cid, prompt_id:_currentPromptId }) });
+  const d = await r.json();
+  document.getElementById('colModal').style.display='none';
+}
+</script>

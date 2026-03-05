@@ -1,0 +1,38 @@
+<!-- ============================================================
+     views/pages/roadmap.ejs  —  Liste des roadmaps
+     ============================================================ -->
+<div class="page-header">
+  <h1>Roadmap IA</h1>
+  <p>Parcours structures selon ton niveau et tes objectifs</p>
+</div>
+
+<div class="roadmap-container" style="max-width:1100px;margin:0 auto">
+  <% if (roadmaps.length === 0) { %>
+  <div class="empty-state">
+    <span class="empty-icon">🗺️</span>
+    <p>Aucune roadmap disponible pour le moment</p>
+    <% if (isAdmin) { %><a href="/admin" class="btn btn-primary">Ajouter depuis l'admin</a><% } %>
+  </div>
+  <% } else { %>
+  <div class="roadmaps-grid">
+    <% roadmaps.forEach(rm => { %>
+    <div class="roadmap-card level-<%= rm.level %>">
+      <div class="roadmap-header">
+        <span class="roadmap-level"><%= rm.level %></span>
+        <h2><%= rm.title %></h2>
+        <span class="roadmap-duration">⏱ <%= rm.estimated_duration || 'Duree variable' %></span>
+      </div>
+      <p class="roadmap-desc"><%= rm.description %></p>
+      <% if (rm.target_profile) { %>
+        <div class="roadmap-target">👤 Pour : <%= rm.target_profile %></div>
+      <% } %>
+      <div class="roadmap-cta" style="margin-top:1.5rem">
+        <a href="/roadmap/<%= rm.id %>" class="btn btn-primary">Voir le parcours →</a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+

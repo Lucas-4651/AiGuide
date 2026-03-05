@@ -1,0 +1,264 @@
+const passport = require('passport');
+const { User, AI, Prompt, FlashCard, Roadmap, Tip, Log, Setting } = require('../models');
+
+// ============================================================
+//  LOGIN ADMIN DÉDIÉ  —  /admin/login
+//  Page et logique séparées de /auth/login (utilisateurs)
+// ============================================================
+
+exports.showAdminLogin = (req, res) => {
+  // Si déjà connecté en tant qu'admin, redirige direct
+  if (req.isAuthenticated() && req.user.role === 'admin') {
+    return res.redirect('/admin');
+  }
+  res.render('admin/login', {
+    layout    : false,          // pas de layout EJS (page autonome)
+    title     : 'Admin Login',
+    error_msg : req.flash('error'),
+    success_msg: req.flash('success')
+  });
+};
+
+exports.adminLogin = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+
+    // Mauvais email ou mot de passe
+    if (!user) {
+      req.flash('error', info ? info.message : 'Identifiants incorrects');
+      return res.redirect('/admin/login');
+    }
+
+    // Compte existant mais PAS admin → accès refusé
+    if (user.role !== 'admin') {
+      req.flash('error', 'Accès refusé — compte non administrateur');
+      return res.redirect('/admin/login');
+    }
+
+    // Compte banni
+    if (!user.is_active) {
+      req.flash('error', 'Compte désactivé');
+      return res.redirect('/admin/login');
+    }
+
+    req.logIn(user, async (err) => {
+      if (err) return next(err);
+      try {
+        await Log.create({
+          user_id   : user.id,
+          action    : 'ADMIN_LOGIN',
+          ip_address: (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim(),
+          created_at: new Date().toISOString()
+        });
+      } catch (e) {}
+      res.redirect('/admin');
+    });
+  })(req, res, next);
+};
+
+exports.adminLogout = (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect('/admin/login');
+  });
+};
+
+
+exports.dashboard = async (req, res, next) => {
+  try {
+    const [userCount, aiCount, promptCount, logCount, recentLogs, recentPrompts, logStats] = await Promise.all([
+      User.count(), AI.count(), Prompt.count(), Log.count(),
+      Log.recent(10), Prompt.recent(5), Log.stats()
+    ]);
+    res.render('admin/dashboard', {
+      title: 'Dashboard Admin',
+      stats: { users: userCount, ais: aiCount, prompts: promptCount, logs: logCount },
+      recentLogs, recentPrompts, logStats
+    });
+  } catch (e) { next(e); }
+};
+
+exports.listAIs = async (req, res, next) => {
+  try {
+    const ais = await AI.adminAll();
+    const types = await AI.types();
+    res.render('admin/ais/index', { title: 'Gestion IAs', ais, types });
+  } catch (e) { next(e); }
+};
+
+exports.newAIForm = (req, res) => {
+  res.render('admin/ais/form', { title: 'Ajouter une IA', ai: null, action: '/admin/ais', method: 'POST' });
+};
+
+exports.createAI = async (req, res, next) => {
+  try {
+    const data = sanitizeAI(req.body);
+    await AI.create(data);
+    req.flash('success', 'IA "' + data.name + '" ajoutee avec succes');
+    res.redirect('/admin/ais');
+  } catch (e) {
+    req.flash('error', 'Erreur: ' + e.message);
+    res.redirect('/admin/ais/new');
+  }
+};
+
+exports.editAIForm = async (req, res, next) => {
+  try {
+    const ai = await AI.byId(req.params.id);
+    if (!ai) { req.flash('error', 'IA introuvable'); return res.redirect('/admin/ais'); }
+    res.render('admin/ais/form', { title: 'Modifier ' + ai.name, ai, action: '/admin/ais/' + ai.id + '?_method=PUT', method: 'POST' });
+  } catch (e) { next(e); }
+};
+
+exports.updateAI = async (req, res, next) => {
+  try {
+    const data = sanitizeAI(req.body);
+    await AI.update(req.params.id, data);
+    req.flash('success', 'IA mise a jour');
+    res.redirect('/admin/ais');
+  } catch (e) { next(e); }
+};
+
+exports.deleteAI = async (req, res, next) => {
+  try {
+    await AI.delete(req.params.id);
+    req.flash('success', 'IA supprimee');
+    res.redirect('/admin/ais');
+  } catch (e) { next(e); }
+};
+
+function sanitizeAI(body) {
+  const toJSON = (val) => {
+    if (!val) return JSON.stringify([]);
+    return JSON.stringify(val.split('\n').map((s) => s.trim()).filter(Boolean));
+  };
+  return {
+    name            : body.name,
+    slug            : body.slug || body.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    description     : body.description,
+    short_description: body.short_description,
+    type            : body.type,
+    provider        : body.provider,
+    website_url     : body.website_url,
+    pricing_type    : body.pricing_type,
+    price_info      : body.price_info,
+    strengths       : toJSON(body.strengths),
+    limitations     : toJSON(body.limitations),
+    use_cases       : toJSON(body.use_cases),
+    tags            : toJSON(body.tags),
+    logo_url        : body.logo_url,
+    difficulty_level: body.difficulty_level,
+    is_featured     : body.is_featured ? 1 : 0,
+    is_active       : body.is_active !== undefined ? (body.is_active ? 1 : 0) : 1,
+    created_at      : new Date().toISOString(),
+    updated_at      : new Date().toISOString()
+  };
+}
+
+exports.listUsers = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const users = await User.all(page, 20);
+    const total = await User.count();
+    res.render('admin/users/index', { title: 'Gestion Utilisateurs', users, total, page, pages: Math.ceil(total / 20) });
+  } catch (e) { next(e); }
+};
+
+exports.toggleUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) { req.flash('error', 'Utilisateur introuvable'); return res.redirect('/admin/users'); }
+    if (user.id === req.user.id) { req.flash('error', 'Tu ne peux pas te desactiver toi-meme'); return res.redirect('/admin/users'); }
+    await User.update(user.id, { is_active: user.is_active ? 0 : 1 });
+    req.flash('success', 'Statut utilisateur mis a jour');
+    res.redirect('/admin/users');
+  } catch (e) { next(e); }
+};
+
+exports.changeRole = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.id === req.user.id) { req.flash('error', 'Action impossible'); return res.redirect('/admin/users'); }
+    const newRole = user.role === 'admin' ? 'user' : 'admin';
+    await User.update(user.id, { role: newRole });
+    req.flash('success', 'Role mis a jour: ' + newRole);
+    res.redirect('/admin/users');
+  } catch (e) { next(e); }
+};
+
+exports.logs = async (req, res, next) => {
+  try {
+    const [logs, stats] = await Promise.all([Log.recent(100), Log.stats()]);
+    res.render('admin/logs/index', { title: 'Logs & Metrics', logs, stats });
+  } catch (e) { next(e); }
+};
+
+exports.listFlashCards = async (req, res, next) => {
+  try {
+    const cards = await FlashCard.adminAll();
+    res.render('admin/content/flashcards', { title: 'Gestion Flash Cards', cards });
+  } catch (e) { next(e); }
+};
+
+exports.createFlashCard = async (req, res, next) => {
+  try {
+    await FlashCard.create({ ...req.body, order_index: req.body.order_index || 0, is_active: 1, created_at: new Date().toISOString() });
+    req.flash('success', 'Flash card ajoutee');
+    res.redirect('/admin/content/flashcards');
+  } catch (e) { next(e); }
+};
+
+exports.updateFlashCard = async (req, res, next) => {
+  try {
+    await FlashCard.update(req.params.id, req.body);
+    req.flash('success', 'Flash card mise a jour');
+    res.redirect('/admin/content/flashcards');
+  } catch (e) { next(e); }
+};
+
+exports.deleteFlashCard = async (req, res, next) => {
+  try {
+    await FlashCard.delete(req.params.id);
+    req.flash('success', 'Flash card supprimee');
+    res.redirect('/admin/content/flashcards');
+  } catch (e) { next(e); }
+};
+
+exports.listTips = async (req, res, next) => {
+  try {
+    const tips = await Tip.adminAll();
+    res.render('admin/content/tips', { title: 'Gestion Tips', tips });
+  } catch (e) { next(e); }
+};
+
+exports.createTip = async (req, res, next) => {
+  try {
+    await Tip.create({ ...req.body, order_index: req.body.order_index || 0, is_active: 1, created_at: new Date().toISOString() });
+    req.flash('success', 'Tip ajoute');
+    res.redirect('/admin/content/tips');
+  } catch (e) { next(e); }
+};
+
+exports.deleteTip = async (req, res, next) => {
+  try {
+    await Tip.delete(req.params.id);
+    req.flash('success', 'Tip supprime');
+    res.redirect('/admin/content/tips');
+  } catch (e) { next(e); }
+};
+
+exports.settings = async (req, res, next) => {
+  try {
+    const settings = await Setting.all();
+    res.render('admin/settings', { title: 'Parametres du site', settings });
+  } catch (e) { next(e); }
+};
+
+exports.updateSettings = async (req, res, next) => {
+  try {
+    const entries = Object.entries(req.body);
+    for (const [key, value] of entries) await Setting.set(key, value);
+    req.flash('success', 'Parametres sauvegardes');
+    res.redirect('/admin/settings');
+  } catch (e) { next(e); }
+};
