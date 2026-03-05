@@ -13,13 +13,34 @@ exports.showAdminLogin = (req, res) => {
 };
 
 exports.adminLogin = (req, res, next) => {
+  console.log('🔵 Tentative de connexion admin:', req.body.email);
   passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
-    if (!user) { req.flash('error', info ? info.message : 'Identifiants incorrects'); return res.redirect('/admin/login'); }
-    if (user.role !== 'admin') { req.flash('error', 'Accès refusé — compte non administrateur'); return res.redirect('/admin/login'); }
-    if (!user.is_active) { req.flash('error', 'Compte désactivé'); return res.redirect('/admin/login'); }
+    console.log('🔵 Authentification:', { err, user: user?.id, info });
+    if (err) {
+      console.log('🔴 Erreur:', err);
+      return next(err);
+    }
+    if (!user) {
+      console.log('🔴 Utilisateur non trouvé');
+      req.flash('error', info ? info.message : 'Identifiants incorrects');
+      return res.redirect('/admin/login');
+    }
+    if (user.role !== 'admin') {
+      console.log('🔴 Pas admin:', user.role);
+      req.flash('error', 'Accès refusé — compte non administrateur');
+      return res.redirect('/admin/login');
+    }
+    if (!user.is_active) {
+      console.log('🔴 Compte inactif');
+      req.flash('error', 'Compte désactivé');
+      return res.redirect('/admin/login');
+    }
     req.logIn(user, async (err) => {
-      if (err) return next(err);
+      if (err) {
+        console.log('🔴 Erreur login:', err);
+        return next(err);
+      }
+      console.log('✅ Connexion réussie!');
       await Log.create({ user_id: user.id, action: 'ADMIN_LOGIN', ip_address: req.ip, created_at: new Date().toISOString() }).catch(() => {});
       res.redirect('/admin');
     });
