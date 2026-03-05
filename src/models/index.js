@@ -30,7 +30,6 @@ function parseJSON(val, fallback) {
   return fallback;
 }
 
-
 function hydrateAI(ai) {
   if (!ai) return null;
   return Object.assign({}, ai, {
@@ -42,7 +41,6 @@ function hydrateAI(ai) {
 }
 
 // ─── USER ─────────────────────────────────────────────────────
-// Dans src/models/index.js, remplacez la section USER par :
 const User = {
   findById   : (id)    => db('users').where({ id }).first(),
   findByEmail: (email) => db('users').where({ email: email.toLowerCase() }).first(),
@@ -124,7 +122,7 @@ const AI = {
 // ─── PROMPT ───────────────────────────────────────────────────
 const Prompt = {
   create   : (data)   => db('prompts').insert(data),
-  findById : (id)     => db('prompts').where({ id }).first(),          // ← était manquant
+  findById : (id)     => db('prompts').where({ id }).first(),
   forUser  : (userId, limit) => db('prompts').where({ user_id: userId }).orderBy('created_at','desc').limit(limit||20),
   public   : (limit)  => db('prompts').where({ is_public: true }).orderBy('created_at','desc').limit(limit||20),
   rate     : (id, rating) => db('prompts').where({ id }).update({ rating }),
@@ -134,15 +132,10 @@ const Prompt = {
 
   guestCount: async (ip) => {
     const today = new Date().toISOString().slice(0,10);
-    // PostgreSQL : DATE(created_at) = $1 ; SQLite : created_at LIKE '2024-01-01%'
     const r = await db('prompts').where({ guest_ip: ip })
-      .whereRaw("created_at::date = ?", [today])
+      .whereRaw("DATE(created_at) = ?", [today])
       .count('id as c').first()
-      .catch(() =>
-        db('prompts').where({ guest_ip: ip })
-          .whereLike('created_at', today + '%')
-          .count('id as c').first()
-      );
+      .catch(() => 0);
     return r ? Number(r.c) : 0;
   }
 };
@@ -187,12 +180,12 @@ const Tip = {
 };
 
 // ─── LOG ──────────────────────────────────────────────────────
-// ─── LOG ──────────────────────────────────────────────────────
 const Log = {
   recent : (limit) => db('activity_logs').orderBy('created_at','desc').limit(limit||50).catch(()=>[]),
-  count  : ()      => db('activity_logs').count('id as c').first().then(r=>Number(r.c)).catch(()=>0),
-  create : (data)  => db('activity_logs').insert(data).catch(()=>null),
+  count  : ()      => db('activity_logs').count('id as c').first().then(r => Number(r.c)).catch(() => 0),
+  create : (data)  => db('activity_logs').insert(data).catch(() => null),
   
+  // ✅ Version corrigée : retourne un TABLEAU pour le template
   stats: async () => {
     try {
       const today = new Date().toISOString().slice(0,10);
@@ -204,14 +197,15 @@ const Log = {
         db('activity_logs').whereRaw('DATE(created_at) = ?', [yesterday]).count('id as c').first().then(r => Number(r.c)).catch(() => 0)
       ]);
       
-      return { 
-        total: total || 0, 
-        today: todayCount || 0, 
-        yesterday: yesterdayCount || 0 
-      };
+      // Retourne un TABLEAU pour que .slice() fonctionne dans le template
+      return [
+        { action: 'Total', count: total || 0 },
+        { action: 'Aujourd\'hui', count: todayCount || 0 },
+        { action: 'Hier', count: yesterdayCount || 0 }
+      ];
     } catch (e) {
       console.error('Erreur stats logs:', e);
-      return { total: 0, today: 0, yesterday: 0 };
+      return []; // Tableau vide en cas d'erreur
     }
   }
 };
@@ -232,7 +226,7 @@ const Setting = {
 
 // ─── FAVORITE ─────────────────────────────────────────────────
 const Favorite = {
-  add    : (userId, aiId) => db('favorites').insert({ user_id: userId, ai_id: aiId, created_at: new Date().toISOString() }).catch(()=>null),
+  add    : (userId, aiId) => db('favorites').insert({ user_id: userId, ai_id: aiId, created_at: new Date().toISOString() }).catch(() => null),
   remove : (userId, aiId) => db('favorites').where({ user_id: userId, ai_id: aiId }).delete(),
   toggle : async (userId, aiId) => {
     const ex = await db('favorites').where({ user_id: userId, ai_id: aiId }).first();
@@ -240,7 +234,6 @@ const Favorite = {
     await db('favorites').insert({ user_id: userId, ai_id: aiId, created_at: new Date().toISOString() });
     return true;
   },
-  // ← hydrateAI ajouté ici pour que tags soit toujours un tableau
   forUser: (userId) =>
     db('favorites')
       .join('ai_tools','favorites.ai_id','ai_tools.id')
@@ -249,17 +242,17 @@ const Favorite = {
       .orderBy('favorites.created_at','desc')
       .then(rows => rows.map(hydrateAI)),
   isLiked : async (userId, aiId) => !!(await db('favorites').where({ user_id: userId, ai_id: aiId }).first()),
-  count   : (userId) => db('favorites').where({ user_id: userId }).count('id as c').first().then(r=>Number(r.c)),
-  countAll: () => db('favorites').count('id as c').first().then(r=>Number(r.c)),
+  count   : (userId) => db('favorites').where({ user_id: userId }).count('id as c').first().then(r => Number(r.c)),
+  countAll: () => db('favorites').count('id as c').first().then(r => Number(r.c)),
 };
 
 // ─── CHALLENGE ────────────────────────────────────────────────
 const Challenge = {
   today: async () => {
     const date = new Date().toISOString().slice(0,10);
-    let ch = await db('daily_challenges').where({ date, is_active: true }).first().catch(()=>null);
+    let ch = await db('daily_challenges').where({ date, is_active: true }).first().catch(() => null);
     if (!ch) {
-      const card = await db('flash_cards').where({ is_active: true }).orderByRaw('RANDOM()').first().catch(()=>null);
+      const card = await db('flash_cards').where({ is_active: true }).orderByRaw('RANDOM()').first().catch(() => null);
       if (card) {
         const ids = await db('daily_challenges').insert({
           date, type:'flashcard', ref_id: card.id,
@@ -267,7 +260,7 @@ const Challenge = {
           is_active: true, created_at: new Date().toISOString()
         });
         const newId = Array.isArray(ids) ? ids[0] : ids;
-        ch = await db('daily_challenges').where({ id: newId }).first().catch(()=>null);
+        ch = await db('daily_challenges').where({ id: newId }).first().catch(() => null);
       }
     }
     return ch || null;
@@ -310,11 +303,11 @@ const Progress = {
 const Collection = {
   forUser    : (uid) => db('collections').where({ user_id: uid }).orderBy('created_at','desc'),
   byId       : (id)  => db('collections').where({ id }).first(),
-  create     : (data)=> db('collections').insert({ ...data, created_at: new Date().toISOString() }),
+  create     : (data) => db('collections').insert({ ...data, created_at: new Date().toISOString() }),
   update     : (id, data) => db('collections').where({ id }).update(data),
   delete     : (id)  => db('collections').where({ id }).delete(),
-  addPrompt  : (cid, pid) => db('collection_prompts').insert({ collection_id: cid, prompt_id: pid, added_at: new Date().toISOString() }).catch(()=>null),
-  removePrompt:(cid, pid) => db('collection_prompts').where({ collection_id: cid, prompt_id: pid }).delete(),
+  addPrompt  : (cid, pid) => db('collection_prompts').insert({ collection_id: cid, prompt_id: pid, added_at: new Date().toISOString() }).catch(() => null),
+  removePrompt: (cid, pid) => db('collection_prompts').where({ collection_id: cid, prompt_id: pid }).delete(),
   prompts    : (cid) => db('collection_prompts').join('prompts','collection_prompts.prompt_id','prompts.id').where({ collection_id: cid }).select('prompts.*').orderBy('added_at','desc'),
   public     : ()    => db('collections').where({ is_public: true }).orderBy('created_at','desc').limit(20),
 };
@@ -323,7 +316,7 @@ const Collection = {
 const Review = {
   forAI    : (aiId) => db('ai_reviews').join('users','ai_reviews.user_id','users.id').where({ 'ai_reviews.ai_id': aiId }).select('ai_reviews.*','users.username').orderBy('ai_reviews.created_at','desc'),
   avgRating: (aiId) => db('ai_reviews').where({ ai_id: aiId }).avg('rating as avg').first().then(r => r ? Math.round((r.avg||0)*10)/10 : 0),
-  count    : (aiId) => db('ai_reviews').where({ ai_id: aiId }).count('id as c').first().then(r=>Number(r.c)),
+  count    : (aiId) => db('ai_reviews').where({ ai_id: aiId }).count('id as c').first().then(r => Number(r.c)),
   byUser   : (uid, aiId) => db('ai_reviews').where({ user_id: uid, ai_id: aiId }).first(),
   create   : (data) => db('ai_reviews').insert({ ...data, created_at: new Date().toISOString() }),
   update   : (uid, aiId, data) => db('ai_reviews').where({ user_id: uid, ai_id: aiId }).update(data),
@@ -333,16 +326,16 @@ const Review = {
 // ─── BADGES ───────────────────────────────────────────────────
 const BADGE_DEFS = {
   'first_prompt'    : { label:'Premier pas',     icon:'⚡', desc:'Premier prompt généré' },
-  'prompt_10'       : { label:'Prolifique',       icon:'🚀', desc:'10 prompts générés' },
+  'prompt_10'       : { label:'Prolifique',      icon:'🚀', desc:'10 prompts générés' },
   'prompt_50'       : { label:'Expert Prompteur', icon:'🎯', desc:'50 prompts générés' },
-  'first_favorite'  : { label:'Curieux',          icon:'❤️', desc:'Première IA mise en favori' },
-  'fav_10'          : { label:'Collectionneur',   icon:'💎', desc:'10 IAs en favoris' },
-  'first_roadmap'   : { label:'En Route',         icon:'🗺️', desc:'Première étape cochée' },
-  'roadmap_complete': { label:'Diplômé',          icon:'🎓', desc:'Roadmap complétée à 100%' },
-  'streak_7'        : { label:'Assidu',           icon:'🔥', desc:'7 jours de streak' },
-  'streak_30'       : { label:'Légende',          icon:'👑', desc:'30 jours de streak' },
-  'first_review'    : { label:'Critique',         icon:'⭐', desc:'Premier avis posté' },
-  'first_collection': { label:'Archiviste',       icon:'📂', desc:'Première collection créée' },
+  'first_favorite'  : { label:'Curieux',         icon:'❤️', desc:'Première IA mise en favori' },
+  'fav_10'          : { label:'Collectionneur',  icon:'💎', desc:'10 IAs en favoris' },
+  'first_roadmap'   : { label:'En Route',        icon:'🗺️', desc:'Première étape cochée' },
+  'roadmap_complete': { label:'Diplômé',         icon:'🎓', desc:'Roadmap complétée à 100%' },
+  'streak_7'        : { label:'Assidu',          icon:'🔥', desc:'7 jours de streak' },
+  'streak_30'       : { label:'Légende',         icon:'👑', desc:'30 jours de streak' },
+  'first_review'    : { label:'Critique',        icon:'⭐', desc:'Premier avis posté' },
+  'first_collection': { label:'Archiviste',      icon:'📂', desc:'Première collection créée' },
 };
 
 const Badge = {
