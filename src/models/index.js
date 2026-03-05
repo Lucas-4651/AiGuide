@@ -187,10 +187,33 @@ const Tip = {
 };
 
 // ─── LOG ──────────────────────────────────────────────────────
+// ─── LOG ──────────────────────────────────────────────────────
 const Log = {
   recent : (limit) => db('activity_logs').orderBy('created_at','desc').limit(limit||50).catch(()=>[]),
   count  : ()      => db('activity_logs').count('id as c').first().then(r=>Number(r.c)).catch(()=>0),
   create : (data)  => db('activity_logs').insert(data).catch(()=>null),
+  
+  stats: async () => {
+    try {
+      const today = new Date().toISOString().slice(0,10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+      
+      const [total, todayCount, yesterdayCount] = await Promise.all([
+        db('activity_logs').count('id as c').first().then(r => Number(r.c)).catch(() => 0),
+        db('activity_logs').whereRaw('DATE(created_at) = ?', [today]).count('id as c').first().then(r => Number(r.c)).catch(() => 0),
+        db('activity_logs').whereRaw('DATE(created_at) = ?', [yesterday]).count('id as c').first().then(r => Number(r.c)).catch(() => 0)
+      ]);
+      
+      return { 
+        total: total || 0, 
+        today: todayCount || 0, 
+        yesterday: yesterdayCount || 0 
+      };
+    } catch (e) {
+      console.error('Erreur stats logs:', e);
+      return { total: 0, today: 0, yesterday: 0 };
+    }
+  }
 };
 
 // ─── SETTING ──────────────────────────────────────────────────
